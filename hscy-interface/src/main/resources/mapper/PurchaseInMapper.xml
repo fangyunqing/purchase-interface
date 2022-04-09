@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hf.project.common.mapper.common.PurchaseInMapper">
+
+
+    <select id="query" resultMap="PurchaseInMap">
+        SELECT
+        DISTINCT
+        a.sStoreInNo,
+        b.sCustomerCodeList,
+        'XNCK999' sStoreNo,
+        a.tStoreInTime,
+        '福建华耀运动用品科技有限公司'  AS  sPurOrgName,
+        a.sRemark,
+        d.sMaterialNo,
+        d.sMaterialName,
+        e.sNCUnit,
+        d.nInQty,
+        d.nNoTaxAmount,
+        d.nAmount,
+        d.nIniPrice,
+        CONVERT(NUMERIC(18,6),d.nIniPrice/(1+d.nTaxRate)) AS nPrice,
+        g.sPobillInNo,
+        f.sBIPItemId
+        FROM mmHWInHdr  a WITH(NOLOCK)
+        JOIN dbo.cuSupplier b (NOLOCK) ON a.uRefSourceGUID=b.uGUID
+        JOIN dbo.mmStore c (NOLOCK) ON a.ummStoreGUID=c.uGUID
+        JOIN dbo.mmHWInDtl d (NOLOCK) ON d.ummInHdrGUID=a.uGUID
+        JOIN dbo.cuUnit e (NOLOCK) ON d.sUnit=e.sUnitName AND e.bUsable = 1
+        LEFT JOIN  dbo.pbcommonPobillInDtl f (NOLOCK) ON f.iId=d.sDiff20
+        LEFT JOIN dbo.pbcommonPobillInHdr g (NOLOCK) ON f.IPobillInHdr=g.iID
+        LEFT JOIN dbo.mmStoreInType h (NOLOCK) ON a.immStoreInTypeID=h.iID
+        WHERE h.sStoreInType='采购入库' AND A.sStoreInNo IN
+        <foreach collection="list" index="index" item="item" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+
+        UNION ALL
+
+        SELECT
+        DISTINCT
+        a.sStoreInNo,
+        b.sCustomerCodeList,
+        c.sStoreNo,
+        a.tStoreInTime,
+        '福建华耀运动用品科技有限公司'  AS  sPurOrgName,
+        a.sRemark,
+        d.sMaterialNo,
+        d.sMaterialName,
+        e.sNCUnit,
+        d.nInQty,
+        d.nNoTaxAmount,
+        d.nAmount,
+        d.nIniPrice,
+        CONVERT(NUMERIC(18,6),d.nIniPrice/(1+d.nTaxRate)) AS nPrice,
+        g.sPobillInNo,
+        f.sBIPItemId
+        FROM dbo.mmFPInHdr  a WITH(NOLOCK)
+        JOIN dbo.cuSupplier b (NOLOCK) ON a.uRefSourceGUID=b.uGUID
+        JOIN dbo.mmStore c (NOLOCK) ON a.ummStoreGUID=c.uGUID
+        JOIN dbo.mmFPInDtl d (NOLOCK) ON d.ummInHdrGUID=a.uGUID
+        JOIN dbo.cuUnit e (NOLOCK) ON d.sUnit=e.sUnitName AND e.bUsable = 1
+        LEFT JOIN  dbo.pbcommonPobillInDtl f (NOLOCK) ON f.iId=d.sDiff20
+        LEFT JOIN dbo.pbcommonPobillInHdr g (NOLOCK) ON f.IPobillInHdr=g.iID
+        LEFT JOIN dbo.mmStoreInType h (NOLOCK) ON a.immStoreInTypeID=h.iID
+        WHERE h.sStoreInType='采购入库' AND A.sStoreInNo IN
+        <foreach collection="list" index="index" item="item" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+
+    </select>
+
+    <resultMap id="PurchaseInMap" type="PurchaseInHdr">
+        <result column="sStoreInNo" jdbcType="VARCHAR" property="billCode" />
+        <result column="sCustomerCodeList" jdbcType="VARCHAR" property="supplierCode" />
+        <result column="sPurOrgName" jdbcType="VARCHAR" property="purOrgName" />
+        <result column="sStoreNo" jdbcType="VARCHAR" property="wareHouseCode" />
+        <result column="tStoreInTime" jdbcType="TIMESTAMP" property="billDate" />
+
+        <collection property="purchaseInDtlList" ofType="PurchaseInDtl" javaType="ArrayList">
+            <result column="sMaterialNo" jdbcType="VARCHAR" property="materialCode" />
+            <result column="sNCUnit" jdbcType="VARCHAR" property="unitCode" />
+            <result column="nInQty" jdbcType="VARCHAR" property="num" />
+            <result column="sPobillInNo" jdbcType="VARCHAR" property="sourceCode" />
+            <result column="sBIPItemId" jdbcType="VARCHAR" property="sourceBodyId" />
+            <result column="nPrice" jdbcType="DECIMAL" property="origPrice" />
+            <result column="nIniPrice" jdbcType="DECIMAL" property="origTaxPrice" />
+            <result column="nAmount" jdbcType="DECIMAL" property="origTaxMoney" />
+            <result column="nNoTaxAmount" jdbcType="DECIMAL" property="origMoney" />
+        </collection>
+    </resultMap>
+
+</mapper>

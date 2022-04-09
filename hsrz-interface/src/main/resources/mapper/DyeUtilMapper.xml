@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hf.project.dye.mapper.DyeUtilMapper">
+
+    <select id="queryMaterialTypeFatherTree" parameterType="string" resultMap="materialTypeMap">
+        with mmAll(uGUID,ummMaterialTypeGUID,sMaterialTypeName,sMaterialTypeCode) as (
+            select uGUID,ummMaterialTypeGUID,sMaterialTypeName,sMaterialTypeCode
+            from mmMaterialType
+            where uGUID = #{id}
+            union all
+            select B.uGUID,B.ummMaterialTypeGUID,B.sMaterialTypeName,B.sMaterialTypeCode
+            from mmAll A
+            JOIN mmMaterialType B ON A.ummMaterialTypeGUID = B.uGUID
+            )
+        select uGUID,ummMaterialTypeGUID,sMaterialTypeName,sMaterialTypeCode from mmAll;
+    </select>
+
+    <select id="queryMaterialTypeChildTree" parameterType="string" resultMap="materialTypeMap">
+        with mmAll(uGUID,ummMaterialTypeGUID,sMaterialTypeName,sMaterialTypeCode) as (
+            select uGUID,ummMaterialTypeGUID,sMaterialTypeName,sMaterialTypeCode
+            from mmMaterialType
+            where uGUID = #{id}
+            union all
+            select B.uGUID,B.ummMaterialTypeGUID,B.sMaterialTypeName,B.sMaterialTypeCode
+            from mmAll A
+            JOIN mmMaterialType B ON A.uGUID = B.ummMaterialTypeGUID
+        )
+        select uGUID,ummMaterialTypeGUID,sMaterialTypeName,sMaterialTypeCode from mmAll;
+    </select>
+
+    <resultMap id="materialTypeMap" type="com.hf.project.dye.entity.MaterialType">
+        <id column="uGUID" jdbcType="VARCHAR" property="guid" />
+        <result column="ummMaterialTypeGUID" jdbcType="VARCHAR" property="materialTypeGUID" />
+        <result column="sMaterialTypeName" jdbcType="VARCHAR" property="materialTypeName" />
+        <result column="sMaterialTypeCode" jdbcType="VARCHAR" property="materialTypeCode" />
+    </resultMap>
+
+    <select id="queryPurchasePlanByPlanNo" parameterType="string" resultMap="purchasePlanHdrMap">
+        SELECT
+            uGUID,
+            iCompanyID,
+            sOrgProviderName,
+            sTrafficMode,
+            sPlanNo,
+            dPlanDate,
+            sBuyersName,
+            upbBuyersGUID,
+            sProviderName,
+            upbProviderGUID,
+            sCurrency,
+            nExchangeRate,
+            sContractType,
+            sInvoiceType,
+            sPaymentMode,
+            uOrgProviderGUID,
+            sConfirmMan,
+            tConfirmTime,
+            sCreator,
+            tCreateTime,
+            sUpdateMan,
+            tUpdateTime,
+            iNoteTypeID,
+            iBillStatus,
+            sAuditMan,
+            tAuditTime
+        FROM mmPurchasePlanHdr
+        WHERE sPlanNo = #{planNo}
+    </select>
+
+    <resultMap id="purchasePlanHdrMap" type="com.hf.project.dye.entity.purchaseplan.PurchasePlanHdr">
+        <id column="uGUID" jdbcType="VARCHAR" property="guid" />
+        <result column="iCompanyID" jdbcType="INTEGER" property="companyID" />
+        <result column="sOrgProviderName" jdbcType="VARCHAR" property="orgProviderName" />
+        <result column="sTrafficMode" jdbcType="VARCHAR" property="trafficMode" />
+        <result column="sPlanNo" jdbcType="VARCHAR" property="planNo" />
+        <result column="dPlanDate" jdbcType="TIMESTAMP" property="planDate" />
+        <result column="sBuyersName" jdbcType="VARCHAR" property="buyerName" />
+        <result column="upbBuyersGUID" jdbcType="VARCHAR" property="buyersGUID" />
+        <result column="sProviderName" jdbcType="VARCHAR" property="providerName" />
+        <result column="upbProviderGUID" jdbcType="VARCHAR" property="providerGUID" />
+        <result column="sCurrency" jdbcType="VARCHAR" property="currency" />
+        <result column="nExchangeRate" jdbcType="DECIMAL" property="exchangeRate" />
+        <result column="sContractType" jdbcType="VARCHAR" property="contractType" />
+        <result column="sInvoiceType" jdbcType="VARCHAR" property="invoiceType" />
+        <result column="sPaymentMode" jdbcType="VARCHAR" property="paymentMode" />
+        <result column="uOrgProviderGUID" jdbcType="VARCHAR" property="orgProviderGUID" />
+        <result column="sConfirmMan" jdbcType="VARCHAR" property="confirmMan" />
+        <result column="tConfirmTime" jdbcType="TIMESTAMP" property="confirmTime" />
+        <result column="sCreator" jdbcType="VARCHAR" property="creator" />
+        <result column="tCreateTime" jdbcType="TIMESTAMP" property="createTime" />
+        <result column="sUpdateMan" jdbcType="VARCHAR" property="updateMan" />
+        <result column="tUpdateTime" jdbcType="TIMESTAMP" property="updateTime" />
+        <result column="iNoteTypeID" jdbcType="INTEGER" property="noteTypeID" />
+        <result column="iBillStatus" jdbcType="INTEGER" property="billStatus" />
+        <result column="sAuditMan" jdbcType="VARCHAR" property="confirmMan" />
+        <result column="tAuditTime" jdbcType="TIMESTAMP" property="confirmTime" />
+    </resultMap>
+</mapper>

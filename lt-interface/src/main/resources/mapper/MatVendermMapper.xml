@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hf.project.lt.mapper.MatVendermMapper">
+
+    <insert id="insertBatch" parameterType="java.util.List">
+        INSERT INTO mat_vender
+        (
+            VendermId,
+            VendermShortName,
+            VendermName,
+            Address,
+            CustRequest,
+            Crter,
+            CrtDt
+        )
+
+        <foreach collection="list" item="item" index="index" open="(" close=")" separator=",">
+            SELECT
+            #{item.vendermId},
+            #{item.vendermName},
+            #{item.vendermName},
+            #{item.address},
+            #{item.NCVendermId},
+            #{item.creator},
+            #{item.createTime}
+        </foreach>
+    </insert>
+
+    <insert id="insert" parameterType="MatVenderm">
+        INSERT INTO mat_vender
+        (
+        VendermId,
+        VendermShortName,
+        VendermName,
+        Address,
+        CustRequest,
+        Crter,
+        CrtDt
+        ) VALUES (
+        #{vendermId},
+        #{vendermName},
+        #{vendermName},
+        #{address},
+        #{NCVendermId},
+        #{creator},
+        #{createTime}
+        )
+    </insert>
+
+    <update id="update"  parameterType="MatVenderm">
+        UPDATE mat_vender SET
+        VendermShortName = #{vendermName},
+        VendermName = #{vendermName},
+        Address = #{address},
+        Crter = #{creator},
+        CrtDt = #{createTime}
+        WHERE CustRequest = #{NCVendermId}
+    </update>
+
+    <select id="query" parameterType="java.util.List" resultMap="MatVendermMap">
+        SELECT
+        VendermId,
+        VendermShortName,
+        VendermName,
+        Address,
+        CustRequest,
+        Crter Creator,
+        CrtDt
+        FROM mat_vender
+        WHERE CustRequest IN
+        <foreach collection="list" item="item" index="index" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="querySingle" parameterType="java.lang.String" resultMap="MatVendermMap">
+        SELECT
+        VendermId,
+        VendermShortName,
+        VendermName,
+        Address,
+        CustRequest,
+        Crter Creator,
+        CrtDt
+        FROM mat_vender
+        WHERE CustRequest = #{NCBillCode}
+    </select>
+
+    <resultMap id="MatVendermMap" type="MatVenderm">
+        <id column="VendermId" jdbcType="VARCHAR" property="vendermId" />
+        <result column="VendermName" jdbcType="VARCHAR" property="vendermName" />
+        <result column="Address" jdbcType="VARCHAR" property="address" />
+        <result column="CustRequest" jdbcType="VARCHAR" property="NCVendermId" />
+        <result column="sAddress" jdbcType="VARCHAR" property="address" />
+        <result column="Creator" jdbcType="VARCHAR" property="creator" />
+        <result column="CrtDt" jdbcType="TIMESTAMP" property="createTime" />
+    </resultMap>
+
+
+
+</mapper>

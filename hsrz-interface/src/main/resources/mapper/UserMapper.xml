@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hf.project.common.mapper.common.UserMapper">
+
+    <select id="query" parameterType="java.lang.String" resultMap="UserMap">
+        SELECT
+        uGUID,
+        sUserID,
+        sUserName
+        FROM
+        smUser
+        WHERE sUserID = #{workCode}
+    </select>
+
+    <resultMap id="UserMap" type="User">
+        <id column="uGUID" jdbcType="VARCHAR" property="id"/>
+        <result column="sUserID" jdbcType="VARCHAR" property="userCode"/>
+        <result column="sUserName" jdbcType="VARCHAR" property="userName"/>
+    </resultMap>
+
+</mapper>

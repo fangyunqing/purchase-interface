@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hf.project.zz.mapper.zz.SendMapper">
+
+    <insert id="insertBatchHdr" parameterType="java.util.List">
+        INSERT INTO MI_SEND_HEAD
+        (GROSS_WEIGHT, NET_WEIGHT, WEIGHT_NO, CAR_NO, SUPPLIER,
+        SUPPLIER_NAME, SUPPLIER2, SUPPLIER_NAME2, STOCK_NO, USER_ID,
+        CHK_USER, CHK_DATE, SYS_DATE, FLAG, SEND_NO,
+        SEND_DATE, REMARK)
+        <foreach collection="list" item="item" index="index" open="(" close=")" separator="UNION ALL">
+            SELECT #{item.grossWeight},#{item.netWeight},#{item.weightBridgeCode},#{item.carNo},#{item.providerNo},
+            #{item.supplierName},#{item.orgSupplier},#{item.orgSupplierName},#{item.stockNo},#{item.creator},
+            #{item.confirmMan},#{item.confirmTime},#{item.createTime},#{item.flag},#{item.sendNo},
+            #{item.purchaseInDate},#{item.purchaseInNo}
+            FROM DUAL
+        </foreach>
+    </insert>
+
+    <insert id="insertBatchDtl" parameterType="java.util.List">
+        INSERT INTO MI_SEND_DETAIL
+        (SEND_NO, PUR_NO, SUM_NO, MTL_NO, PUR_QTY,
+        REC_QTY, REC_QTY2, UNIT, UNIT2, MTL_LOT,
+        GRADE, PRICE, STOCK_NO, REC_DATE, FLAG,
+        BIP_ITEM_ID, PRICE2, VENDOR_NO)
+        <foreach collection="list" item="item" index="index" separator="UNION ALL" open="(" close=")">
+            SELECT #{item.sendNo},#{item.planNo},#{item.sumNo},#{item.materialNo},#{item.purQty},
+            #{item.qty},#{item.pkgQty},#{item.unit},#{item.unit2},#{item.mtlLot},
+            #{item.grade},#{item.taxPrice},#{item.stockNo},#{item.recDate},#{item.flag},
+            #{item.BIPItemId},#{item.price},#{item.vendorNo}
+            FROM DUAL
+        </foreach>
+    </insert>
+
+    <delete id="deleteBatchHdr" parameterType="java.util.List">
+        DELETE MI_SEND_HEAD
+        WHERE REMARK IN
+        <foreach collection="list" item="item" index="index" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </delete>
+
+    <delete id="deleteBatchDtl" parameterType="java.util.List">
+        DELETE MI_SEND_DETAIL
+        WHERE SEND_NO IN (SELECT SEND_NO FROM MI_SEND_HEAD WHERE REMARK IN
+        <foreach collection="list" item="item" index="index" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+        )
+    </delete>
+
+    <select id="existBillCode" resultType="java.lang.Boolean" parameterType="java.lang.String">
+        SELECT
+		CASE WHEN EXISTS(
+					SELECT 1
+					FROM MI_SEND_HEAD
+					WHERE REMARK = #{billCode} ) THEN 1
+		ELSE 0 END
+		FROM DUAL
+    </select>
+
+    <select id="canDelete" resultType="java.lang.Boolean" parameterType="java.lang.String">
+		SELECT
+		CASE WHEN EXISTS(
+					SELECT 1
+					FROM WM_STOCK_DETAIL
+					WHERE REF_NO3 IN (SELECT TO_CHAR(SEND_NO) FROM MI_SEND_HEAD WHERE REMARK = #{billCode} )) THEN 0
+		ELSE 1
+		END
+		FROM DUAL
+    </select>
+
+    <select id="getNextVal" resultType="long">
+        Select wm_sendno.nextval From Dual
+    </select>
+</mapper>

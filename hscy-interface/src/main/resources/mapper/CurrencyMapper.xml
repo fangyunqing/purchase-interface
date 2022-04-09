@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hf.project.common.mapper.datadict.CurrencyMapper">
+
+    <select id="query" parameterType="java.lang.String" resultMap="CurrencyMap">
+        SELECT
+        TOP 1
+        iId,
+        sCurrencyCode,
+        sCurrencyName,
+        sNcCurrency,
+        nExchangeRate
+        FROM cuCurrency WITH(NOLOCK)
+        WHERE sNcCurrency = #{NCCode}
+    </select>
+
+    <resultMap id="CurrencyMap" type="BaseData">
+        <id column="iId" jdbcType="VARCHAR" property="id"/>
+        <result column="sCurrencyCode" jdbcType="VARCHAR" property="code"/>
+        <result column="sCurrencyName" jdbcType="VARCHAR" property="name" />
+        <result column="sNcCurrency" jdbcType="VARCHAR" property="NCCode" />
+        <result column="nExchangeRate" jdbcType="VARCHAR" property="memo" />
+    </resultMap>
+
+    <insert id="insert" parameterType="BaseData">
+        INSERT INTO cuCurrency(iId,sCurrencyCode,sCurrencyName,sCurrencyISO,bLocalCurrency,sCreator,dCreateDate,bUsable,sNCCurrency)
+        VALUES(#{id},#{code},#{name},#{code},0,'admin',GETDATE(),1,#{NCCode})
+    </insert>
+
+</mapper>

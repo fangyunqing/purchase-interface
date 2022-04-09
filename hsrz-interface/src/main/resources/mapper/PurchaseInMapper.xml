@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hf.project.common.mapper.common.PurchaseInMapper">
+
+
+    <select id="query" resultMap="PurchaseInMap">
+        SELECT
+        A.sStoreInNo,
+        C.sProviderNo,
+        C.sProviderName,
+        C.uGUID uProviderGUID,
+        'XNCK999' sStoreNo,
+        D.sStoreName,
+        A.tCreateTime,
+        B.sDiff01 sPurchaseInNo,
+        B.sMaterialNo,
+        B.ummMaterialGUID,
+        E.sMaterialName,
+        U.sNCUnit,
+        B.nInQty,
+        H.sCNCompanyFullName,
+        W.sBIPItemId,
+        W.nNoTaxPrice,
+        W.nPrice,
+        W.nPrice * B.nInQty nTaxMoney,
+        W.nNoTaxPrice * B.nInQty nMoney
+        FROM dbo.mmDCInHdr A WITH(NOLOCK)
+        LEFT JOIN dbo.mmDCInDtl B WITH(NOLOCK) ON B.ummInHdrGUID = A.uGUID
+        JOIN dbo.pbCommonPurchaseInDtl W WITH(NOLOCK) ON B.uRefDtlGUID = W.uGUID
+        LEFT JOIN dbo.mmPurchasePlanDtl F WITH(NOLOCK) ON F.uGUID = B.ummPurchasePlanDtlGUID
+        LEFT JOIN dbo.mmPurchasePlanHdr G WITH(NOLOCK) ON G.uGUID = F.ummPurchasePlanHdrGUID
+        LEFT JOIN dbo.smLocalCompany H WITH(NOLOCK) ON H.iCompanyID = G.iCompanyID
+        LEFT JOIN dbo.pbProvider C WITH(NOLOCK) ON A.uRefSourceGUID = C.uGUID
+        LEFT JOIN dbo.mmStore D WITH(NOLOCK) ON A.ummStoreGUID = D.uGUID
+        LEFT JOIN dbo.mmMaterial E WITH(NOLOCK) ON B.ummMaterialGUID = E.uGUID
+        LEFT JOIN dbo.pbUnit U WITH(NOLOCK) ON B.sUnit = U.sUnit
+        WHERE A.sStoreInNo IN
+        <foreach collection="list" index="index" item="item" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </select>
+
+    <resultMap id="PurchaseInMap" type="PurchaseInHdr">
+        <result column="sStoreInNo" jdbcType="VARCHAR" property="billCode" />
+        <result column="sProviderNo" jdbcType="VARCHAR" property="supplierCode" />
+        <result column="sCNCompanyFullName" jdbcType="VARCHAR" property="purOrgName" />
+        <result column="sStoreNo" jdbcType="VARCHAR" property="wareHouseCode" />
+        <result column="tCreateTime" jdbcType="TIMESTAMP" property="billDate" />
+
+
+        <collection property="purchaseInDtlList" ofType="PurchaseInDtl" javaType="ArrayList">
+            <result column="sMaterialNo" jdbcType="VARCHAR" property="materialCode" />
+            <result column="sNCUnit" jdbcType="VARCHAR" property="unitCode" />
+            <result column="nInQty" jdbcType="VARCHAR" property="num" />
+            <result column="sPurchaseInNo" jdbcType="VARCHAR" property="sourceCode" />
+            <result column="sBIPItemId" jdbcType="VARCHAR" property="sourceBodyId" />
+            <result column="nNotTaxPrice" jdbcType="DECIMAL" property="origPrice" />
+            <result column="nPrice" jdbcType="DECIMAL" property="origTaxPrice" />
+            <result column="nTaxMoney" jdbcType="DECIMAL" property="origTaxMoney" />
+            <result column="nMoney" jdbcType="DECIMAL" property="origMoney" />
+        </collection>
+    </resultMap>
+
+</mapper>

@@ -1,0 +1,86 @@
+server:
+  port: 9093
+  servlet:
+    context-path: /ZZ
+
+spring:
+  datasource:
+    zz:
+      username: api
+      password: ZZerp2021.
+      url: jdbc:oracle:thin:@192.168.8.77:1521:HFERP
+      driverClassName: oracle.jdbc.OracleDriver
+      type: com.alibaba.druid.pool.DruidDataSource
+      initialSize: 5
+      minIdle: 5
+      maxActive: 20
+      maxWait: 6000
+      timeBetweenEvictionRunsMillis: 60000
+      minEvictableIdleTimeMillis: 300000
+      validationQuery: SELECT 1 FROM DUAL
+      testWhileIdle: true
+      testOnBorrow: false
+      testOnReturn: false
+      vpoolPreparedStatements: true
+      maxPoolPreparedStatementPerConnectionSize: 20
+      filters: stat,wall,log4j2
+      connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
+    hsrz:
+      username: sa
+      password: love1982@
+      url: jdbc:sqlserver://192.168.8.112:1433;DatabaseName=HSWarpERPTest
+      driverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver
+      type: com.alibaba.druid.pool.DruidDataSource
+      initialSize: 5
+      minIdle: 5
+      maxActive: 20
+      maxWait: 6000
+      timeBetweenEvictionRunsMillis: 60000
+      minEvictableIdleTimeMillis: 300000
+      validationQuery: SELECT 1
+      testWhileIdle: true
+      testOnBorrow: false
+      testOnReturn: false
+      vpoolPreparedStatements: true
+      maxPoolPreparedStatementPerConnectionSize: 20
+      filters: stat,wall,log4j2
+      connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
+  mail:
+    # 配置 smtp 服务器地址
+    host: smtp.exmail.qq.com
+    # 发送者邮箱
+    username: yunqing.fang@huafeng-cn.com
+    # 配置密码
+    password: xLHB3H8eC3xuvqMA
+    # 端口号465或587
+    port: 465
+    # 默认的邮件编码为UTF-8
+    default-encoding: UTF-8
+    # 配置SSL 加密工厂
+    properties:
+      mail:
+        smtp:
+          auth: true
+          ssl:
+            enable: true
+            socketFactory:
+              class: com.sun.mail.util.MailSSLSocketFactory
+              fallback: false
+        debug: false
+
+
+purchasing-cloud:
+  request-property:
+    sys-code: ZZ
+    sys-name: 织造(ZZ)
+    test-mode: false
+    tenant-id: c979tew3
+    material: false
+    purchase-arrival: true
+    purchase-contract: false
+    purchase-in: true
+    purchase-order: true
+    purchase-request: true
+    supplier: true
+    init_material: false
+    org-name: 福建华峰新材料有限公司莆田分公司

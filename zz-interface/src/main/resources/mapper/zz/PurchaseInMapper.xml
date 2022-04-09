@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hf.project.common.mapper.common.PurchaseInMapper">
+
+
+    <select id="query" resultMap="PurchaseInMap">
+        SELECT
+        B.SLIP_NO,
+        '福建华峰新材料有限公司莆田分公司' GROUP_NAME,
+        B.DEPT_NO,
+        'XNCK999' STOCK_NO,
+        B.SYS_DATE,
+        A.MTL_NO,
+        A.IN_QTY,
+        A.UNIT,
+        D.PRICE TAX_PRICE,
+        D.PRICE2 PRICE,
+        NVL(D.PRICE,0)*A.IN_QTY TAX_AMOUNT,
+        NVL(D.PRICE2,0)*A.IN_QTY AMOUNT,
+        C.REMARK,
+        D.BIP_ITEM_ID
+        FROM
+        WM_STOCK_HEAD B
+        INNER JOIN WM_STOCK_DETAIL A ON A.SLIP_NO=B.SLIP_NO
+        INNER JOIN MI_SEND_DETAIL D ON A.REF_NO3=TO_CHAR(D.SEND_NO) AND D.MTL_NO=A.MTL_NO
+        INNER JOIN MI_SEND_HEAD C ON C.SEND_NO=D.SEND_NO
+        WHERE B.SLIP_TYPE='采购入库' AND A.SLIP_NO IN
+        <foreach collection="list" index="index" item="item" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </select>
+
+    <resultMap id="PurchaseInMap" type="PurchaseInHdr">
+        <result column="SLIP_NO" jdbcType="VARCHAR" property="billCode" />
+        <result column="DEPT_NO" jdbcType="VARCHAR" property="supplierCode" />
+        <result column="GROUP_NAME" jdbcType="VARCHAR" property="purOrgName" />
+        <result column="STOCK_NO" jdbcType="VARCHAR" property="wareHouseCode" />
+        <result column="SYS_DATE" jdbcType="TIMESTAMP" property="billDate" />
+        <collection property="purchaseInDtlList" ofType="PurchaseInDtl" javaType="ArrayList">
+            <result column="MTL_NO" jdbcType="VARCHAR" property="materialCode" />
+            <result column="UNIT" jdbcType="VARCHAR" property="unitCode" />
+            <result column="IN_QTY" jdbcType="VARCHAR" property="num" />
+            <result column="REMARK" jdbcType="VARCHAR" property="sourceCode" />
+            <result column="BIP_ITEM_ID" jdbcType="VARCHAR" property="sourceBodyId" />
+            <result column="PRICE" jdbcType="DECIMAL" property="origPrice" />
+            <result column="TAX_PRICE" jdbcType="DECIMAL" property="origTaxPrice" />
+            <result column="TAX_AMOUNT" jdbcType="DECIMAL" property="origTaxMoney" />
+            <result column="AMOUNT" jdbcType="DECIMAL" property="origMoney" />
+        </collection>
+    </resultMap>
+
+</mapper>

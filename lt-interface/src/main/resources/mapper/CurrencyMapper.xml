@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hf.project.common.mapper.datadict.CurrencyMapper">
+
+    <select id="query" parameterType="java.lang.String" resultMap="CurrencyMap">
+        SELECT
+        TOP 1
+        Pur_hb,
+        HBName,
+        NcCurrency,
+        HL
+        FROM AC_HB WITH(NOLOCK)
+        WHERE NcCurrency = #{NCCode}
+    </select>
+
+    <resultMap id="CurrencyMap" type="BaseData">
+        <id column="Pur_hb" jdbcType="VARCHAR" property="id"/>
+        <result column="Pur_hb" jdbcType="VARCHAR" property="code"/>
+        <result column="HBName" jdbcType="VARCHAR" property="name" />
+        <result column="NcCurrency" jdbcType="VARCHAR" property="NCCode" />
+        <result column="HL" jdbcType="VARCHAR" property="memo" />
+    </resultMap>
+
+    <insert id="insert" parameterType="BaseData">
+        INSERT INTO AC_HB(Pur_hb,HBName,HL,used,UpdateDate,Cur,NCCurrency)
+        VALUES(#{code},#{name},1,'Y',GETDATE(),0,#{code})
+    </insert>
+
+</mapper>

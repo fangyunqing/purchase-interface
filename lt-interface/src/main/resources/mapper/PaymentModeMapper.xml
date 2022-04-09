@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hf.project.common.mapper.datadict.PaymentModeMapper">
+
+    <select id="query" parameterType="java.lang.String" resultMap="PaymentModeMap">
+        SELECT TOP 1
+        PayWayNo,PayWayNm,NCPayWayNo
+        FROM odr_payway
+        WHERE NCPayWayNo = #{NCCode}
+    </select>
+
+    <resultMap id="PaymentModeMap" type="BaseData">
+        <id column="PayWayNo" jdbcType="VARCHAR" property="id"/>
+        <result column="PayWayNo" jdbcType="VARCHAR" property="code"/>
+        <result column="PayWayNm" jdbcType="VARCHAR" property="name" />
+        <result column="NCPayWayNo" jdbcType="VARCHAR" property="NCCode" />
+    </resultMap>
+
+    <insert id="insert" parameterType="BaseData">
+        INSERT INTO odr_payway(PayWayNo,PayWayNm,Pay_Percent,pay_days,PayWayKind,IMPAP,IMPAR,NCPayWayNo)
+        VALUES(#{code},#{name},0,0,'B',1,1,#{NCCode})
+    </insert>
+
+</mapper>

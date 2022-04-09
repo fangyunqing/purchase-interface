@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hf.project.common.mapper.common.PurchaseRequestMapper">
+
+    <select id="query" resultMap="PurchaseRequestMap" parameterType="java.util.List">
+        SELECT DISTINCT
+            a.sPobillRequestMstNo,
+            '福建华耀运动用品科技有限公司' AS sCNCompanyFullName,
+            b.iID,
+            b.sDtlMaterialCode,
+            c.sNCUnit,
+            b.sRealModel,
+            '福建省莆田市荔城区黄石镇谷城西路168号' AS sReceiveAddress,
+            '福建华耀运动用品科技有限公司' AS sReceiveGroupName,
+            a.sCreator ,
+            b.dDeliveryDate,
+            b.nQty
+        FROM dbo.pobillRequestMst a  WITH(NOLOCK)
+        JOIN dbo.pobillRequestDtl b WITH(NOLOCK) ON a.iid=b.ipobillRequestMstId
+        LEFT JOIN dbo.cuUnit c WITH(NOLOCK) ON b.sUnit=c.sUnitName AND c.bUsable = 1
+        WHERE sPobillRequestMstNo in
+        <foreach collection="list" index="index" item="item" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </select>
+
+    <resultMap id="PurchaseRequestMap" type="PurchaseRequest">
+        <id column="iID" jdbcType="VARCHAR" property="itemId" />
+        <result column="sPobillRequestMstNo" jdbcType="VARCHAR" property="billCode" />
+        <result column="sCNCompanyFullName" jdbcType="VARCHAR" property="purOraName" />
+        <result column="sDtlMaterialCode" jdbcType="VARCHAR" property="materialCode" />
+        <result column="sRealModel" jdbcType="VARCHAR" property="materialSpec" />
+        <result column="sNCUnit" jdbcType="VARCHAR" property="materialUnitCode" />
+        <result column="sReceiveAddress" jdbcType="VARCHAR" property="planPersonReceiveAddress" />
+        <result column="sReceiveGroupName" jdbcType="VARCHAR" property="receiveOrgName" />
+        <result column="sCreator" jdbcType="VARCHAR" property="reqContactCode" />
+        <result column="dDeliveryDate" jdbcType="TIMESTAMP" property="reqDate" />
+        <result column="sCNCompanyFullName" jdbcType="VARCHAR" property="planPsnOrgName" />
+        <result column="nQty" jdbcType="DECIMAL" property="materialAmounts" />
+    </resultMap>
+
+    <select id="existRequestDlt" parameterType="java.util.Map" resultType="java.lang.Boolean">
+        SELECT
+		CASE WHEN EXISTS(
+                SELECT 1
+                FROM dbo.pobillRequestMst a  WITH(NOLOCK)
+                JOIN dbo.pobillRequestDtl b WITH(NOLOCK) ON a.iid=b.ipobillRequestMstId
+                WHERE a.sPobillRequestMstNo = #{billCode} AND B.iID = #{id} ) THEN 1
+		ELSE 0
+		END
+    </select>
+</mapper>

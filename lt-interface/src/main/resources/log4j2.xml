@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+    <Properties>
+        <property name="name">main</property>
+    </Properties>
+    <Appenders>
+        <SMTP name="Mail" subject="采购云染整API异常"
+              to="yunqing.fang@huafeng-cn.com" from="yunqing.fang@huafeng-cn.com"
+              smtpProtocol="smtps" smtpSsl="true" smtpStarttls="true"
+              smtpHost="smtp.exmail.qq.com" smtpPort="465" bufferSize="50" smtpDebug="false" smtpPassword="xLHB3H8eC3xuvqMA" smtpUsername="yunqing.fang@huafeng-cn.com">
+        </SMTP>
+        <console name="console" target="system_out">
+            <patternLayout pattern="%d %highlight{%-5p} %highlight{[%t]} %C{2} - %m%n" />
+        </console>
+        <Routing name="Routing">
+            <Routes pattern="$${thread:name}">
+                <Route>
+                    <RollingFile name="logFile-${thread:name}"
+                                 fileName="log/${thread:name}.log"
+                                 filePattern="log/${thread:name}/${thread:name}-%d{yyyy-MM-dd}-%i.log.gz">
+                        <PatternLayout pattern="%d %-5p [%t] %C{2} - %m%n" />
+                        <Policies>
+                            <SizeBasedTriggeringPolicy size="100MB" />
+                            <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                        </Policies>
+                        <DefaultRolloverStrategy max="1000">
+                            <Delete basePath="log" maxDepth="4">
+                                <IfFileName glob="**/*.log.gz"/>
+                                <IfLastModified age="10d"/>
+                            </Delete>
+                        </DefaultRolloverStrategy>
+                    </RollingFile>
+                </Route>
+            </Routes>
+        </Routing>
+
+    </Appenders>
+    <Loggers>
+        <Root level="debug">
+            <AppenderRef ref="Routing" />
+            <AppenderRef ref="console" />
+            <AppenderRef ref="Mail" />
+        </Root>
+    </Loggers>
+</Configuration>

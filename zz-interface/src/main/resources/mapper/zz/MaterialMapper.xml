@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hf.project.common.mapper.common.MaterialMapper">
+
+    <select id="query" parameterType="java.util.List" resultMap="MaterialMap">
+        SELECT
+        MTL_NO,
+        MTL_NAME,
+        YARN_COUNT,
+        UNIT
+        FROM tm.TM_MATERIAL_YARN
+        WHERE MTL_NO in
+        <foreach collection="list" index="index" open="(" close=")" item="item" separator=",">
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="querySingle" parameterType="java.lang.String" resultMap="MaterialMap">
+        SELECT
+        MTL_NO,
+        MTL_NAME,
+        YARN_COUNT,
+        UNIT
+        FROM tm.TM_MATERIAL_YARN
+        WHERE MTL_NO = #{billCode}
+    </select>
+
+    <select id="queryAllMaterialNo" resultType="java.lang.String">
+        SELECT
+        MTL_NO
+        FROM tm.TM_MATERIAL_YARN
+    </select>
+
+    <select id="querySync" parameterType="java.util.Date" resultType="java.lang.String">
+        SELECT
+        MTL_NO
+        FROM tm.TM_MATERIAL_YARN
+        WHERE UPD_DATE > #{syncDate}
+    </select>
+
+    <resultMap id="MaterialMap" type="Material">
+        <id column="MTL_NO" jdbcType="VARCHAR" property="id"/>
+        <result column="MTL_NO" jdbcType="VARCHAR" property="code" />
+        <result column="MTL_NAME" jdbcType="VARCHAR" property="name" />
+        <result column="YARN_COUNT" jdbcType="VARCHAR" property="materialSpec" />
+        <result column="UNIT" jdbcType="VARCHAR" property="measdoc" />
+        <result column="UNIT" jdbcType="VARCHAR" property="unit" />
+    </resultMap>
+
+</mapper>

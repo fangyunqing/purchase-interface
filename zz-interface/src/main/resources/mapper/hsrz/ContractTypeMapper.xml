@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hf.project.common.mapper.datadict.ContractTypeMapper">
+
+    <select id="query" parameterType="java.lang.String" resultMap="contractTypeMap">
+        SELECT code,name
+        FROM (
+                 SELECT '01' code,'内购' name
+                 UNION ALL
+                 SELECT '02' code,'外购' name
+             ) A
+        WHERE A.code = #{NCCode}
+    </select>
+
+    <resultMap id="contractTypeMap" type="BaseData">
+        <id column="code" jdbcType="VARCHAR" property="code"/>
+        <result column="name" jdbcType="VARCHAR" property="name" />
+    </resultMap>
+
+</mapper>

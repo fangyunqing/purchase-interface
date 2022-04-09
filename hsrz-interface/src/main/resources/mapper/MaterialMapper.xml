@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hf.project.common.mapper.common.MaterialMapper">
+
+    <select id="query" parameterType="java.util.List" resultMap="MaterialMap">
+        SELECT
+            A.uGUID,
+            A.sMaterialNo,
+            A.sMaterialName,
+            ISNULL(B.sNCUnit,C.sNCunit) sNCUnit,
+            A.sUnit,
+            A.sSpecification,
+            A.sComponent,
+            D.sMaterialTypeCode,
+            A.ummMaterialTypeGUID,
+            A.sPurchaseOrProcess
+        FROM dbo.mmMaterial A WITH(NOLOCK)
+        LEFT JOIN dbo.mmMaterialType D WITH(NOLOCK) ON A.ummMaterialTypeGUID = D.uGUID
+        LEFT JOIN dbo.pbUnit B WITH(NOLOCK) ON A.sUnit = B.sUnit
+        LEFT JOIN dbo.pbUnit C WITH(NOLOCK) ON A.sUnit = C.sUnitName
+        WHERE A.sMaterialNo in
+        <foreach collection="list" index="index" open="(" close=")" item="item" separator=",">
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="querySingle" parameterType="java.lang.String" resultMap="MaterialMap">
+        SELECT
+            A.uGUID,
+            A.sMaterialNo,
+            A.sMaterialName,
+            ISNULL(B.sNCUnit,C.sNCunit) sNCUnit,
+            A.sUnit,
+            A.sSpecification,
+            A.sComponent,
+            D.sMaterialTypeCode,
+            A.ummMaterialTypeGUID,
+            A.sPurchaseOrProcess
+        FROM dbo.mmMaterial A WITH(NOLOCK)
+        LEFT JOIN dbo.mmMaterialType D WITH(NOLOCK) ON A.ummMaterialTypeGUID = D.uGUID
+        LEFT JOIN dbo.pbUnit B WITH(NOLOCK) ON A.sUnit = B.sUnit
+        LEFT JOIN dbo.pbUnit C WITH(NOLOCK) ON A.sUnit = C.sUnitName
+        WHERE sMaterialNo = #{billCode}
+    </select>
+
+    <select id="queryAllMaterialNo" resultType="java.lang.String">
+        SELECT
+        A.sMaterialNo
+        FROM dbo.mmMaterial A WITH(NOLOCK)
+    </select>
+
+    <resultMap id="MaterialMap" type="Material">
+        <id column="uGUID" jdbcType="VARCHAR" property="id"/>
+        <result column="sMaterialNo" jdbcType="VARCHAR" property="code" />
+        <result column="sMaterialName" jdbcType="VARCHAR" property="name" />
+        <result column="sNCUnit" jdbcType="VARCHAR" property="measdoc" />
+        <result column="sUnit" jdbcType="VARCHAR" property="unit" />
+        <result column="sSpecification" jdbcType="VARCHAR" property="materialSpec" />
+        <result column="sMaterialNo" jdbcType="VARCHAR" property="materialType" />
+        <result column="sMaterialTypeCode" jdbcType="VARCHAR" property="marBasClass" />
+        <result column="ummMaterialTypeGUID" jdbcType="VARCHAR" property="marBasClassId" />
+        <result column="sPurchaseOrProcess" jdbcType="VARCHAR" property="define1" />
+    </resultMap>
+
+</mapper>

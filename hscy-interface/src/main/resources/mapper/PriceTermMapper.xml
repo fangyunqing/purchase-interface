@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hf.project.common.mapper.datadict.PriceTermMapper">
+
+    <select id="query" parameterType="java.lang.String" resultMap="CurrencyMap">
+        SELECT
+        TOP 1
+        uGUID,
+        sValueCode,
+        sValueName,
+        sNCValue
+        FROM pbDataDictionary WITH(NOLOCK)
+        WHERE sTypeCode = '03004' AND sNCValue = #{NCCode}
+    </select>
+
+    <resultMap id="CurrencyMap" type="BaseData">
+        <id column="uGUID" jdbcType="VARCHAR" property="id"/>
+        <result column="sValueCode" jdbcType="VARCHAR" property="code"/>
+        <result column="sValueName" jdbcType="VARCHAR" property="name" />
+        <result column="sNCValue" jdbcType="VARCHAR" property="NCCode" />
+    </resultMap>
+
+    <insert id="insert" parameterType="BaseData">
+        INSERT INTO pbDataDictionary
+        (sTypeCode,sValueCode,sValueName,sNCValue,bIsSystem,bUsable,sCreator,tCreateTime,sFunctionModule,sUpdateMan)
+        VALUES('03004',#{code},#{name},#{NCCode},0,1,'admin',GETDATE(),'销售管理03','admin')
+    </insert>
+
+</mapper>

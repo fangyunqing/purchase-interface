@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hf.project.cloth.mapper.ClothUtilMapper">
+
+    <select id="getMRPRequest" parameterType="java.lang.String" resultMap="MRPRequestMap">
+        SELECT
+        bSelected=convert(bit,0),
+        b.iMaterialDtlId,
+        sRealGMM=d.sGMM,
+        sRealWidth=d.sWidth,
+        b.sRealModel,
+        b.sStyleNo,
+        b.sOrderNo,
+        b.sLotNO,
+        b.sSkuNo,
+        b.nMRPQty,
+        b.sMaterialName,
+        b.sProductNo,
+        c.nUnitConvertRate,
+        c.nWastageRate,
+        c.nFixedWastageQty,
+        iRefDtlId=b.iID,
+        isdMrpPoMaterialId=b.isdMrpPoMaterialID,
+        ipobillRequestDtlID=b.iID,
+        d.iUnitId,
+        iMRPUnitId=d.iUnitId
+        FROM  dbo.pobillRequestMst a WITH(NOLOCK)
+        JOIN dbo.pobillRequestDtl b WITH(NOLOCK) ON a.iid=b.ipobillRequestMstId
+        LEFT JOIN dbo.sdMrpPoMaterial c WITH(NOLOCK) ON b.isdMrpPoMaterialID=c.iID
+        LEFT JOIN dbo.vwmmMaterial d WITH(NOLOCK) ON c.iMaterialDtlId=d.iMaterialDtlId
+        WHERE b.iID = #{requestDtlId}
+    </select>
+
+    <resultMap id="MRPRequestMap" type="MRPRequest">
+        <result column="isdMrpPoMaterialId" jdbcType="INTEGER" property="sdMrpPoMaterialId"/>
+        <result column="sOrderNo" jdbcType="VARCHAR" property="orderNo" />
+        <result column="sStyleNo" jdbcType="VARCHAR" property="styleNo" />
+        <result column="sProductNo" jdbcType="VARCHAR" property="productNo"/>
+        <result column="nMRPQty" jdbcType="DECIMAL" property="MRPQty" />
+        <result column="iMRPUnitId" jdbcType="INTEGER" property="MRPUnitId" />
+        <result column="nFixedWastageQty" jdbcType="DECIMAL" property="fixedWastage"/>
+        <result column="nWastageRate" jdbcType="DECIMAL" property="wastageRate" />
+        <result column="nUnitConvertRate" jdbcType="VARCHAR" property="unitConvertRate" />
+    </resultMap>
+
+    <select id="getMaxCurrencyId" resultType="integer">
+        SELECT ISNULL(MAX(iId),0) maxId FROM cuCurrency WITH(NOLOCK)
+    </select>
+
+    <select id="getMaxInvoiceId" resultType="integer">
+        SELECT ISNULL(MAX(iId),0) maxId FROM poInvoice WITH(NOLOCK)
+    </select>
+
+    <select id="getMaxUnitId" resultType="integer">
+        SELECT ISNULL(MAX(iId),0) maxId FROM dbo.cuUnit WITH(NOLOCK)
+    </select>
+
+    <select id="getMaxPaymentId" resultType="integer">
+        SELECT ISNULL(MAX(iId),0) maxId FROM dbo.poPayment WITH(NOLOCK)
+    </select>
+
+    <select id="getOrderInfo" parameterType="string" resultMap="orderInfoMap">
+        SELECT
+        DISTINCT
+        TOP 1
+        sLotNo,sContractNo,dDeliveryDate,sProductNo,iCustomerId,sCustPoNo,nInseam
+        FROM dbo.sdOrderMst o (NOLOCK)
+        INNER JOIN dbo.sdOrderStyleDtl os (NOLOCK) ON os.iOrderId = o.iId
+        INNER JOIN dbo.sdOrderStyleLot sl (NOLOCK) ON sl.iOrderStyleDtlId = os.iId
+        INNER JOIN dbo.sdOrderLot sol (NOLOCK) ON  sl.iOrderLotId = sol.iId
+        WHERE sProductNo = #{productNo}
+    </select>
+
+    <resultMap id="orderInfoMap" type="orderInfo">
+        <result column="sLotNo" jdbcType="VARCHAR" property="lotNo"/>
+        <result column="sContractNo" jdbcType="VARCHAR" property="contractNo" />
+        <result column="dDeliveryDate" jdbcType="TIMESTAMP" property="deliveryDate" />
+        <result column="sProductNo" jdbcType="VARCHAR" property="productNo"/>
+        <result column="iCustomerId" jdbcType="INTEGER" property="customerId" />
+        <result column="sCustPoNo" jdbcType="VARCHAR" property="custPoNo" />
+        <result column="nInseam" jdbcType="INTEGER" property="inseam"/>
+    </resultMap>
+</mapper>

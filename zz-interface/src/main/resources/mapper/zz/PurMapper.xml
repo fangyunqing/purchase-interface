@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hf.project.zz.mapper.zz.PurMapper">
+
+    <insert id="insertBatchHdr" parameterType="java.util.List">
+        INSERT INTO MP_PUR_HDR
+        (CP_ID, PUR_NO, PUR_DATE, PUR_TYPE, BUYER_NAME,
+        SUPPLIER, SUPPLIER_NAME, CURRENCY, EXCHANGE_RATE, INV_TYPE,
+        PAY_MODE, FLAG, USER_NAME, SYS_DATE, UPD_USER,
+        UPD_DATE, CHK_USER, CHK_DATE)
+        <foreach collection="list" item="item" index="index" open="(" close=")" separator="UNION ALL">
+            SELECT #{item.cpID},#{item.planNo},#{item.planDate},#{item.contractType},#{item.buyerName},
+            #{item.providerNo},#{item.supplierName},#{item.currency},#{item.exchangeRate},#{item.invoiceType},
+            #{item.paymentMode},#{item.flag},#{item.creator},#{item.createTime},#{item.updateMan},
+            #{item.updateTime},#{item.confirmMan},#{item.confirmTime}
+            FROM DUAL
+        </foreach>
+    </insert>
+
+    <insert id="insertBatchDtl" parameterType="java.util.List">
+        INSERT INTO MP_PUR_DTL
+        (PUR_NO, MTL_NO, MTL_NAME, MTL_SPEC, QTY,
+        UNIT, PRICE, AMT, PKG_QTY, TAX_RATE,
+        TAX_AMT, ETC, GRADE, REQ_NO, STATUS,
+        REC_QTY, BIP_ITEM_ID)
+        <foreach collection="list" item="item" index="index" separator="UNION ALL" open="(" close=")">
+            SELECT #{item.purNo},#{item.materialNo},#{item.mtlName},#{item.mtlSpec},#{item.qty},
+            #{item.unit},#{item.taxPrice},#{item.amount},#{item.pkgQty},#{item.taxRate},
+            #{item.taxAmount},#{item.deliveryDate},#{item.grade},#{item.requestNo},#{item.status},
+            #{item.recQty},#{item.BIPItemId}
+            FROM DUAL
+        </foreach>
+    </insert>
+
+    <delete id="deleteBatchHdr" parameterType="java.util.List">
+        DELETE FROM MP_PUR_HDR
+        WHERE PUR_NO IN
+        <foreach collection="list" item="item" index="index" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </delete>
+
+    <delete id="deleteBatchDtl" parameterType="java.util.List">
+        DELETE FROM MP_PUR_DTL
+        WHERE PUR_NO IN
+        <foreach collection="list" item="item" index="index" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </delete>
+
+    <select id="canDelete" resultType="java.lang.Boolean" parameterType="java.lang.String">
+		SELECT
+		CASE WHEN EXISTS(
+					SELECT 1
+					FROM MI_SEND_DETAIL
+					WHERE PUR_NO = #{billCode} ) THEN 0
+		ELSE 1
+		END
+		FROM DUAL
+    </select>
+
+    <select id="existBillCode" resultType="java.lang.Boolean" parameterType="java.lang.String">
+        SELECT
+		CASE WHEN EXISTS(
+					SELECT 1
+					FROM MP_PUR_HDR
+					WHERE PUR_NO = #{billCode} ) THEN 1
+		ELSE 0 END
+		FROM DUAL
+    </select>
+
+    <select id="getPurDtl" parameterType="java.lang.String" resultMap="PurDtlMap">
+        SELECT
+        PUR_NO, MTL_NO, MTL_NAME, MTL_SPEC, QTY,
+        UNIT, PRICE, AMT, PKG_QTY, TAX_RATE,
+        TAX_AMT, ETC, GRADE, REQ_NO, STATUS,
+        REC_QTY, BIP_ITEM_ID
+        FROM MP_PUR_DTL
+        WHERE PUR_NO = #{billCode} AND BIP_ITEM_ID = #{BIPItemID}
+    </select>
+
+    <resultMap id="PurDtlMap" type="PurDtl">
+        <result column="PUR_NO" jdbcType="VARCHAR" property="purNo" />
+        <result column="MTL_NO" jdbcType="VARCHAR" property="materialNo" />
+        <result column="MTL_NAME" jdbcType="VARCHAR" property="mtlName" />
+        <result column="MTL_SPEC" jdbcType="VARCHAR" property="mtlSpec" />
+        <result column="QTY" jdbcType="DECIMAL" property="qty" />
+        <result column="UNIT" jdbcType="VARCHAR" property="unit" />
+        <result column="PRICE" jdbcType="DECIMAL" property="price" />
+        <result column="AMT" jdbcType="DECIMAL" property="amount" />
+        <result column="PKG_QTY" jdbcType="DECIMAL" property="pkgQty" />
+        <result column="TAX_RATE" jdbcType="VARCHAR" property="taxRate" />
+        <result column="TAX_AMT" jdbcType="DECIMAL" property="taxAmount" />
+        <result column="ETC" jdbcType="TIMESTAMP" property="deliveryDate" />
+        <result column="GRADE" jdbcType="VARCHAR" property="grade" />
+        <result column="REQ_NO" jdbcType="VARCHAR" property="requestNo" />
+        <result column="STATUS" jdbcType="BIT" property="status" />
+        <result column="REC_QTY" jdbcType="DECIMAL" property="recQty" />
+        <result column="BIP_ITEM_ID" jdbcType="VARCHAR" property="BIPItemId" />
+    </resultMap>
+
+    <update id="updatePurRecQty" parameterType="PurDtl">
+        UPDATE MP_PUR_DTL SET REC_QTY = #{recQty}, STATUS = #{status}
+        WHERE PUR_NO = #{purNo} AND BIP_ITEM_ID = #{BIPItemId}
+    </update>
+
+</mapper>

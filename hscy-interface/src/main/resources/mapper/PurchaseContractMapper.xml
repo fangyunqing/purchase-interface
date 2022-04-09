@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hf.project.cloth.mapper.PurchaseContractMapper">
+
+    <insert id="insertBatchHdr" parameterType="java.util.List">
+        INSERT INTO mmPurchaseContractHdr
+        (uGUID,sContractNo,sContractType,iCompanyID,upbProviderGUID,
+        sProviderName,dContractDate,dStartDate,dEndDate,bUsable,iBillStatus,
+        sCreator,tCreateTime,sUpdateMan,tUpdateTime,sConfirmMan,tConfirmTime)
+        <foreach collection="list" item="item" index="index" open="(" close=")" separator="UNION ALL">
+            SELECT #{item.guid},#{item.contractNo},#{item.contractType},#{item.companyID},#{item.providerGUID},
+            #{item.providerName},#{item.contractDate},#{item.startDate},#{item.endDate},#{item.usable},#{item.billStatus},
+            #{item.creator},#{item.createTime},#{item.updateMan},#{item.updateTime},#{item.confirmMan},#{item.confirmTime}
+        </foreach>
+    </insert>
+
+    <insert id="insertBatchDtl" parameterType="java.util.List">
+        INSERT INTO mmPurchaseContractDtl
+        (uGUID,ummPurchaseContractHdrGUID,ummMaterialGUID,sMaterialNo,sMaterialName,
+        nQty,sUnit,nPrice,nDiscountRate,nAmount)
+        <foreach collection="list" item="item" index="index" open="(" close=")" separator="UNION ALL">
+            SELECT #{item.guid},#{item.parentGUID},#{item.materialGUID},#{item.materialNo},#{item.materialName},
+            #{item.qty},#{item.unit},#{item.price},#{item.discountRate},#{item.amount}
+        </foreach>
+    </insert>
+
+    <update id="updateUsableBatch" parameterType="java.util.Map">
+        UPDATE mmPurchaseContractHdr
+        SET bUsable = #{usable}
+        WHERE sContractNo IN
+        <foreach collection="billCodes" item="item" index="index" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </update>
+
+    <select id="existBillCode" parameterType="java.util.Map" resultType="java.lang.Boolean">
+        SELECT
+		CASE WHEN EXISTS(
+                SELECT 1
+                FROM mmPurchaseContractHdr A WITH(NOLOCK)
+                WHERE A.sContractNo = #{billCode} AND A.bUsable = 1 ) THEN 1
+		ELSE 0
+		END
+    </select>
+</mapper>

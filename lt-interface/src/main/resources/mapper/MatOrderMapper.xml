@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hf.project.lt.mapper.MatOrderMapper">
+
+    <insert id="insertBatchHdr" parameterType="java.util.List">
+        INSERT INTO mat_CG
+        (
+            PNO,CGDT,Policy_Id,VendermID,CGDept,
+            Pur_HB,HL,JHAdr,Creater,CrtDt,
+            CheckFlag,Checker,CheckDt,payflag,
+            CG_Kind,fac_no,paywayno,deliverno,checkno
+        )
+
+        <foreach collection="list" item="item" index="index" open="(" close=")" separator=",">
+            SELECT
+            #{item.planNo},#{item.createTime},#{item.policyID},#{item.providerNo},#{item.cgDept},
+            #{item.currency},#{item.exchangeRate},#{item.JhAdr},#{item.creator},#{item.createTime},
+            #{item.checkFlag},#{item.confirmMan},#{item.confirmTime},#{item.payFlag},
+            #{item.cgKind},#{item.facNo},#{item.paymentMode},#{item.deliveryType},#{item.invoiceType}
+        </foreach>
+    </insert>
+
+    <insert id="insertBatchDtl" parameterType="java.util.List">
+        INSERT INTO mat_CG_C
+        (
+        PNO,cItem,Matno,CG_Qty,CgUnit,Unit,
+        mPrice,JHDt,VENDERJHDT,bPrice,Tax_Amount,
+        LimitPer,SortNO,BIPItemId,BatchNo,IMPORT_ITME
+        )
+
+        <foreach collection="list" item="item" index="index" open="(" close=")" separator=",">
+            SELECT
+            #{item.orderNo},#{item.item},#{item.materialNo},#{item.qty},#{item.cgUnit},#{item.unit},
+            #{item.taxPrice},#{item.deliveryDate},#{item.deliveryDate},#{item.price},#{item.taxAmount},
+            #{item.limitPer},#{item.sortNo},#{item.BIPItemId},#{item.requestNo},#{item.requestItemId}
+        </foreach>
+    </insert>
+
+    <select id="existBillCode" resultType="java.lang.Boolean" parameterType="java.lang.String">
+        SELECT
+		CASE WHEN EXISTS(
+					SELECT 1
+					FROM dbo.mat_CG WITH(NOLOCK)
+					WHERE PNo = #{billCode} ) THEN 1
+		ELSE 0 END
+    </select>
+
+    <delete id="deleteBatchHdr" parameterType="java.util.List">
+        DELETE mat_CG
+        WHERE PNO IN
+        <foreach collection="list" item="item" index="index" separator="," open="(" close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <delete id="deleteBatchDtl" parameterType="java.util.List">
+        DELETE mat_CG_C
+        WHERE PNO IN
+        <foreach collection="list" item="item" index="index" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </delete>
+
+    <select id="canDelete" resultType="java.lang.Boolean" parameterType="java.lang.String">
+        SELECT
+		CASE WHEN EXISTS(
+					SELECT 1 FROM vi_mat_rk_inf WITH(NOLOCK) where cgno = #{billCode} ) THEN 0
+		ELSE 1
+		END
+    </select>
+</mapper>

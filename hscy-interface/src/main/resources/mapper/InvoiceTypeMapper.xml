@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hf.project.common.mapper.datadict.InvoiceTypeMapper">
+
+    <select id="query" parameterType="java.lang.String" resultMap="InvoiceTypeMap">
+        SELECT
+        TOP 1
+        iId,
+        sInvoiceCode,
+        sInvoiceName,
+        sNCInvoice
+        FROM poInvoice WITH(NOLOCK)
+        WHERE sNCInvoice = #{NCCode}
+    </select>
+
+    <resultMap id="InvoiceTypeMap" type="BaseData">
+        <id column="iId" jdbcType="VARCHAR" property="id"/>
+        <result column="sInvoiceCode" jdbcType="VARCHAR" property="code"/>
+        <result column="sInvoiceName" jdbcType="VARCHAR" property="name" />
+        <result column="sNCInvoice" jdbcType="VARCHAR" property="NCCode" />
+    </resultMap>
+
+    <insert id="insert" parameterType="BaseData">
+        INSERT INTO poInvoice
+        (iId,sInvoiceCode,sInvoiceName,sNCInvoice,bUsable,sCreator,dCreateDate)
+        VALUES(#{id},#{code},#{name},#{NCCode},1,'admin',GETDATE())
+    </insert>
+
+</mapper>

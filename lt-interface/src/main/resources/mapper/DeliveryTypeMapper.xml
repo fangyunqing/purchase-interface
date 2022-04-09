@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hf.project.common.mapper.datadict.DeliveryTypeMapper">
+
+    <select id="query" parameterType="java.lang.String" resultMap="deliveryTypeMap">
+        SELECT TOP 1
+        DeliverNo,
+        DeliverWay,
+        NCDeliverNo
+        FROM odr_deliver
+        WHERE NCDeliverNo = #{NCCode}
+    </select>
+
+    <resultMap id="deliveryTypeMap" type="BaseData">
+        <id column="DeliverNo" jdbcType="VARCHAR" property="id"/>
+        <result column="DeliverNo" jdbcType="VARCHAR" property="code"/>
+        <result column="DeliverWay" jdbcType="VARCHAR" property="name" />
+        <result column="NCDeliverNo" jdbcType="VARCHAR" property="NCCode" />
+    </resultMap>
+
+    <insert id="insert" parameterType="BaseData">
+        INSERT INTO odr_deliver(DeliverNo,DeliverWay,NCDeliverNo)
+        VALUES(#{code},#{name},#{code})
+    </insert>
+
+</mapper>

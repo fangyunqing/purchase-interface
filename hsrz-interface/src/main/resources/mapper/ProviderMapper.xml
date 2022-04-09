@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hf.project.dye.mapper.ProviderMapper">
+    <select id="query" parameterType="java.util.List" resultMap="ProvideMap">
+        SELECT
+        uGUID,
+        sProviderNo,sProviderName,
+        sProviderType,upbProviderTypeGUID,
+        sNCProviderNo,bUsable,tCreateTime,sCreator,iCompanyID
+        FROM dbo.pbProvider WITH(NOLOCK)
+        WHERE sNCProviderNo in
+        <foreach collection="list" item="item" index="index" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="querySingle" parameterType="java.lang.String" resultMap="ProvideMap">
+        SELECT
+            TOP 1
+            uGUID,
+            sProviderNo,sProviderName,
+            sProviderType,upbProviderTypeGUID,
+            sNCProviderNo,bUsable,tCreateTime,sCreator,iCompanyID
+        FROM dbo.pbProvider WITH(NOLOCK)
+        WHERE sNCProviderNo = #{NCBillCode}
+    </select>
+
+    <resultMap id="ProvideMap" type="Provider">
+        <id column="uGUID" jdbcType="VARCHAR" property="guid" />
+        <result column="sProviderNo" jdbcType="VARCHAR" property="providerNo" />
+        <result column="sProviderName" jdbcType="VARCHAR" property="providerName" />
+        <result column="sProviderType" jdbcType="VARCHAR" property="providerType" />
+        <result column="upbProviderTypeGUID" jdbcType="VARCHAR" property="providerTypeGUID" />
+        <result column="sNCProviderNo" jdbcType="VARCHAR" property="NCProviderNo" />
+        <result column="bUsable" jdbcType="BIT" property="usable" />
+        <result column="tCreateTime" jdbcType="TIMESTAMP" property="createTime" />
+        <result column="sCreator" jdbcType="VARCHAR" property="creator" />
+        <result column="iCompanyID" jdbcType="INTEGER" property="companyID" />
+    </resultMap>
+
+    <insert id="insertBatch" parameterType="java.util.List">
+        INSERT INTO dbo.pbProvider
+        (uGUID,
+        sProviderNo,sProviderName,
+        sProviderType,upbProviderTypeGUID,
+        sNCProviderNo,bUsable,tCreateTime,sCreator,iCompanyID)
+        <foreach collection="list" item="item" index="index" separator="UNION ALL" open="(" close=")">
+            SELECT #{item.guid},
+            #{item.providerNo},#{item.providerName},
+            #{item.providerType},#{item.providerTypeGUID},
+            #{item.NCProviderNo},#{item.usable},#{item.createTime},#{item.creator},#{item.companyID}
+        </foreach>
+    </insert>
+
+    <insert id="insert" parameterType="Provider">
+        INSERT INTO dbo.pbProvider
+        (uGUID,
+        sProviderNo,sProviderName,
+        sProviderType,upbProviderTypeGUID,
+        sNCProviderNo,bUsable,tCreateTime,sCreator,iCompanyID)
+        VALUES
+        (
+        #{guid},
+        #{providerNo},#{providerName},
+        #{providerType},#{providerTypeGUID},
+        #{NCProviderNo},#{usable},#{createTime},#{creator},#{companyID}
+        )
+    </insert>
+
+    <update id="update" parameterType="Provider">
+        UPDATE dbo.pbProvider SET
+        sProviderName = #{providerName},
+        sProviderType= #{providerType},upbProviderTypeGUID = #{providerTypeGUID},
+        bUsable = #{usable},tCreateTime = #{createTime},sCreator = #{creator},iCompanyID = #{companyID}
+    </update>
+</mapper>

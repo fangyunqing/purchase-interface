@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hf.project.common.mapper.common.MaterialMapper">
+
+    <select id="query" parameterType="java.util.List" resultMap="MaterialMap">
+        SELECT
+        a.ID,
+        a.MATNO,
+        a.MAT_NM,
+        a.spec,
+        a.UNIT,
+        b.NcUnit,
+        a.long,
+        a.Width,
+        a.High,
+        a.CancelFlag
+        FROM Mat_Material a WITH(NOLOCK)
+        LEFT JOIN mat_KCandCGDW b WITH(NOLOCK) ON  a.UNIT=b.Unit and a.CG_UNIT = b.CGUnit
+        WHERE A.MATNO in
+        <foreach collection="list" index="index" open="(" close=")" item="item" separator=",">
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="querySingle" parameterType="java.lang.String" resultMap="MaterialMap">
+        SELECT
+        a.ID,
+        a.MATNO,
+        a.MAT_NM,
+        a.spec,
+        a.UNIT,
+        b.NcUnit,
+        a.long,
+        a.Width,
+        a.High,
+        a.CancelFlag
+        FROM Mat_Material a WITH(NOLOCK)
+        LEFT JOIN mat_KCandCGDW b WITH(NOLOCK) ON  a.UNIT=b.Unit and a.CG_UNIT = b.CGUnit
+        WHERE A.MATNO = #{billCode}
+    </select>
+
+    <select id="queryAllMaterialNo" resultType="java.lang.String">
+        SELECT
+            a.MATNO
+        FROM Mat_Material a WITH(NOLOCK)
+        LEFT JOIN mat_KCandCGDW b WITH(NOLOCK) ON  a.UNIT=b.Unit and a.CG_UNIT = b.CGUnit
+        WHERE b.NcUnit is not null and a.MAT_NM is not null and a.MAT_NM &lt;&gt; ''
+    </select>
+
+    <resultMap id="MaterialMap" type="Material">
+        <id column="ID" jdbcType="VARCHAR" property="id"/>
+        <result column="MATNO" jdbcType="VARCHAR" property="code" />
+        <result column="MAT_NM" jdbcType="VARCHAR" property="name" />
+        <result column="NcUnit" jdbcType="VARCHAR" property="measdoc" />
+        <result column="UNIT" jdbcType="VARCHAR" property="unit" />
+        <result column="spec" jdbcType="VARCHAR" property="materialSpec" />
+        <result column="long" jdbcType="VARCHAR" property="unitLength" />
+        <result column="High" jdbcType="VARCHAR" property="unitHeight" />
+        <result column="Width" jdbcType="VARCHAR" property="unitWidth" />
+        <result column="ID" jdbcType="VARCHAR" property="materialType" />
+    </resultMap>
+
+</mapper>

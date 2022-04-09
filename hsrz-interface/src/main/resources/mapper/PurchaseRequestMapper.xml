@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hf.project.common.mapper.common.PurchaseRequestMapper">
+
+    <select id="query" resultMap="PurchaseRequestMap" parameterType="java.util.List">
+        SELECT
+            A.sRequestNo,
+            A.sCreator,
+            C.sCNCompanyFullName AS sReqCompanyName,
+            C.sAddress AS sReqAddress,
+            B.uGUID itemCode,
+            D.sMaterialNo,
+            B.nQty,
+            F.sNCUnit,
+            B.dDeliveryDate,
+            A.sWorkCentreName,
+            G.sCNCompanyFullName AS sPurCompanyName,
+            G.sAddress AS sPurAddress,
+            D.sMaterialCategory,
+            D.sRawConstruction,
+            E.sNCProviderNo,
+            B.sRequest,
+            A.iNoteTypeID
+        FROM mmPurchaseRequestHdr A WITH(NOLOCK)
+        LEFT JOIN dbo.mmPurchaseRequestDtl B WITH(NOLOCK) ON B.ummPurchaseRequestHdrGUID = A.uGUID
+        LEFT JOIN dbo.smLocalCompany C WITH(NOLOCK) ON A.iRequestCompanyID = C.iCompanyID
+        LEFT JOIN dbo.mmMaterial D WITH(NOLOCK) ON B.ummMaterialGUID = D.uGUID
+        LEFT JOIN dbo.pbProvider E WITH(NOLOCK) ON B.upbProviderGUID = E.uGUID
+        LEFT JOIN dbo.pbUnit F WITH(NOLOCK) ON F.sUnit = B.sUnit
+        LEFT JOIN dbo.smLocalCompany G WITH(NOLOCK) ON A.iConcentratedPurchaseCompanyID = G.iCompanyID
+        WHERE sRequestNo in
+        <foreach collection="list" index="index" item="item" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </select>
+
+    <resultMap id="PurchaseRequestMap" type="PurchaseRequest">
+        <id column="itemCode" jdbcType="VARCHAR" property="itemId" />
+        <result column="sRequestNo" jdbcType="VARCHAR" property="billCode" />
+        <result column="sPurCompanyName" jdbcType="VARCHAR" property="purOraName" />
+        <result column="sMaterialNo" jdbcType="VARCHAR" property="materialCode" />
+        <result column="sMaterialCategory" jdbcType="VARCHAR" property="materialModel" />
+        <result column="sRawConstruction" jdbcType="VARCHAR" property="materialSpec" />
+        <result column="sNCUnit" jdbcType="VARCHAR" property="materialUnitCode" />
+        <result column="sReqAddress" jdbcType="VARCHAR" property="planPersonReceiveAddress" />
+        <result column="sPurCompanyName" jdbcType="VARCHAR" property="receiveOrgName" />
+        <result column="sCreator" jdbcType="VARCHAR" property="reqContactCode" />
+        <result column="dDeliveryDate" jdbcType="TIMESTAMP" property="reqDate" />
+        <result column="sNCProviderNo" jdbcType="VARCHAR" property="suggestSupplierCode" />
+        <result column="sReqCompanyName" jdbcType="VARCHAR" property="planPsnOrgName" />
+        <result column="nQty" jdbcType="DECIMAL" property="materialAmounts" />
+        <result column="sRequest" jdbcType="VARCHAR" property="memo" />
+        <result column="iNoteTypeID" jdbcType="INTEGER" property="define1" />
+    </resultMap>
+
+    <select id="existRequestDlt" parameterType="java.util.Map" resultType="java.lang.Boolean">
+        SELECT
+		CASE WHEN EXISTS(
+                SELECT 1
+                FROM mmPurchaseRequestHdr A WITH(NOLOCK)
+                JOIN dbo.mmPurchaseRequestDtl B WITH(NOLOCK) ON B.ummPurchaseRequestHdrGUID = A.uGUID
+                WHERE A.sRequestNo = #{billCode} AND B.uGUID = #{id} ) THEN 1
+		ELSE 0
+		END
+    </select>
+</mapper>

@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hf.project.zz.mapper.zz.ProviderMapper">
+
+    <insert id="insertBatch" parameterType="java.util.List">
+        INSERT INTO WM_PROVIDER
+        (
+            PROVIDER_NO,
+            PROVIDER_NAME,
+            USER_NAME,
+            SYS_DATE,
+            FLAG,
+            FULL_NAME,
+            TTYPE,
+            ADDRESS,
+            UGUID
+        )
+
+        <foreach collection="list" item="item" index="index" open="(" close=")" separator=",">
+            SELECT
+            #{item.providerNo},
+            #{item.providerName},
+            #{item.syncType},
+            #{item.sysDate},
+            #{item.flag},
+            #{item.providerName},
+            #{item.type,jdbcType=VARCHAR},
+            #{item.address,jdbcType=VARCHAR},
+            #{item.guid}
+            FROM DUAL
+        </foreach>
+    </insert>
+
+    <insert id="insert" parameterType="Provider">
+        INSERT INTO WM_PROVIDER
+        (
+        PROVIDER_NO,
+        PROVIDER_NAME,
+        USER_NAME,
+        SYS_DATE,
+        FLAG,
+        FULL_NAME,
+        TTYPE,
+        ADDRESS,
+        UGUID
+        ) VALUES (
+        #{providerNo},
+        #{providerName},
+        #{syncType},
+        #{sysDate},
+        #{flag},
+        #{providerName},
+        #{type},
+        #{address},
+        #{guid}
+        )
+    </insert>
+
+    <update id="update" parameterType="Provider">
+        UPDATE WM_PROVIDER SET
+        PROVIDER_NAME = #{providerName},
+        USER_NAME = #{syncType},
+        SYS_DATE = #{sysDate},
+        FLAG = #{flag},
+        FULL_NAME = #{providerName},
+        TTYPE = #{type},
+        ADDRESS = #{address}
+        WHERE PROVIDER_NO = #{providerNo}
+    </update>
+
+
+    <select id="query" parameterType="java.util.List" resultMap="ProviderMap">
+        SELECT
+        PROVIDER_NO,
+        PROVIDER_NAME,
+        USER_NAME,
+        SYS_DATE,
+        FLAG,
+        FULL_NAME,
+        TTYPE TYPE,
+        ADDRESS,
+        UGUID GUID
+        FROM WM_PROVIDER
+        WHERE PROVIDER_NO IN
+        <foreach collection="list" item="item" index="index" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="querySingle" parameterType="java.lang.String" resultMap="ProviderMap">
+        SELECT
+        PROVIDER_NO,
+        PROVIDER_NAME,
+        USER_NAME,
+        SYS_DATE,
+        FLAG,
+        FULL_NAME,
+        TTYPE TYPE,
+        ADDRESS,
+        UGUID GUID
+        FROM WM_PROVIDER
+        WHERE PROVIDER_NO = #{NCBillCode}
+    </select>
+
+    <resultMap id="ProviderMap" type="Provider">
+        <id column="PROVIDER_NO" jdbcType="VARCHAR" property="providerNo" />
+        <result column="PROVIDER_NAME" jdbcType="VARCHAR" property="providerName" />
+        <result column="USER_NAME" jdbcType="VARCHAR" property="syncType" />
+        <result column="SYS_DATE" jdbcType="TIMESTAMP" property="sysDate" />
+        <result column="FLAG" jdbcType="BIT" property="flag" />
+        <result column="TYPE" jdbcType="VARCHAR" property="type" />
+        <result column="ADDRESS" jdbcType="VARCHAR" property="address" />
+        <result column="GUID" jdbcType="VARCHAR" property="guid" />
+    </resultMap>
+
+
+
+</mapper>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hf.project.dye.mapper.BuyerMapper">
+
+    <select id="query" parameterType="java.lang.String" resultMap="BuyerMap">
+        SELECT TOP 1
+        uGUID,
+        sBuyerNo,
+        sBuyerName,
+        upbBuyersGroupGUID,
+        usmUserGUID
+        FROM dbo.pbBuyers WITH(NOLOCK) WHERE sBuyerNo = #{sBuyerNo}
+    </select>
+
+    <resultMap id="BuyerMap" type="Buyer">
+        <id column="uGUID" jdbcType="VARCHAR" property="guid" />
+        <result column="sBuyerNo" jdbcType="VARCHAR" property="buyerNo" />
+        <result column="sBuyerName" jdbcType="VARCHAR" property="buyerName" />
+        <result column="upbBuyersGroupGUID" jdbcType="VARCHAR" property="userGUID" />
+        <result column="usmUserGUID" jdbcType="VARCHAR" property="groupGUID" />
+    </resultMap>
+
+    <insert id="insert" parameterType="Buyer">
+        INSERT INTO dbo.pbBuyers
+        (uGUID,sBuyerNo,sBuyerName,upbBuyersGroupGUID,bIsGroupManager,usmUserGUID,sCreator,tCreateTime,sUpdateMan,tUpdateTime,bUsable)
+        VALUES(#{guid},#{buyerNo},#{buyerName},#{groupGUID},0,#{userGUID},'cttsoft',GETDATE(),'cttsoft',GETDATE(),1)
+    </insert>
+
+</mapper>

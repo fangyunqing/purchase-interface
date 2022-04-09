@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hf.project.cloth.mapper.SupplierMapper">
+
+    <select id="query" parameterType="java.util.List" resultMap="SupplierMap">
+        SELECT
+        iID,
+        sSupplierCode,
+        sSupplierName,
+        sSupplierTypeCode,
+        sAddress,
+        sCreator,
+        dCreateDate,
+        bUsable,
+        sCustomerCodeList ,
+        uGUID
+        FROM dbo.cuSupplier WITH(NOLOCK)
+        WHERE sCustomerCodeList in
+        <foreach collection="list" item="item" index="index" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="querySingle" parameterType="java.lang.String" resultMap="SupplierMap">
+        SELECT
+        iID,
+        sSupplierCode,
+        sSupplierName,
+        sSupplierTypeCode,
+        sAddress,
+        sCreator,
+        dCreateDate,
+        bUsable,
+        sCustomerCodeList ,
+        uGUID
+        FROM dbo.cuSupplier WITH(NOLOCK)
+        WHERE sCustomerCodeList = #{NCBillCode}
+    </select>
+
+    <resultMap id="SupplierMap" type="Supplier">
+        <id column="iID" jdbcType="INTEGER" property="id" />
+        <result column="sSupplierCode" jdbcType="VARCHAR" property="supplierCode" />
+        <result column="sSupplierName" jdbcType="VARCHAR" property="supplierName" />
+        <result column="sSupplierTypeCode" jdbcType="VARCHAR" property="supplierTypeCode" />
+        <result column="sAddress" jdbcType="VARCHAR" property="address" />
+        <result column="sCreator" jdbcType="VARCHAR" property="creator" />
+        <result column="dCreateDate" jdbcType="TIMESTAMP" property="createDate" />
+        <result column="bUsable" jdbcType="BIT" property="usable" />
+        <result column="sCustomerCodeList" jdbcType="VARCHAR" property="NCSupplierCode" />
+        <result column="uGUID" jdbcType="VARCHAR" property="guid" />
+    </resultMap>
+
+    <insert id="insertBatch" parameterType="java.util.List">
+        INSERT INTO dbo.cuSupplier
+        (
+        iID,
+        sSupplierCode,
+        sSupplierName,
+        sSupplierTypeCode,
+        sAddress,
+        sCreator,
+        dCreateDate,
+        bUsable,
+        sCustomerCodeList ,
+        uGUID,
+        sSupplierShortName
+        )
+        <foreach collection="list" item="item" index="index" separator="UNION ALL" open="(" close=")">
+            SELECT
+            #{item.id},
+            #{item.supplierCode},
+            #{item.supplierName},
+            #{item.supplierTypeCode},
+            #{item.address},
+            #{item.creator},
+            #{item.createDate},
+            #{item.usable},
+            #{item.NCSupplierCode},
+            #{item.guid},
+            #{item.supplierName}
+        </foreach>
+    </insert>
+
+    <insert id="insert" parameterType="Supplier">
+        INSERT INTO dbo.cuSupplier
+        (
+        iID,
+        sSupplierCode,
+        sSupplierName,
+        sSupplierTypeCode,
+        sAddress,
+        sCreator,
+        dCreateDate,
+        bUsable,
+        sCustomerCodeList ,
+        uGUID,
+        sSupplierShortName
+        )
+        VALUES (
+        #{id},
+        #{supplierCode},
+        #{supplierName},
+        #{supplierTypeCode},
+        #{address},
+        #{creator},
+        #{createDate},
+        #{usable},
+        #{NCSupplierCode},
+        #{guid},
+        #{supplierName}
+        )
+    </insert>
+
+    <update id="update" parameterType="Supplier">
+        UPDATE dbo.cuSupplier SET
+        sSupplierName = #{supplierName},
+        sSupplierTypeCode = #{supplierTypeCode},
+        sAddress = #{address},
+        sCreator = #{creator},
+        dCreateDate = #{createDate},
+        bUsable = #{usable},
+        sSupplierShortName = #{supplierName}
+        WHERE sCustomerCodeList = #{NCSupplierCode}
+    </update>
+
+    <select id="getMaxId" resultType="java.lang.Integer">
+        SELECT ISNULL(MAX(iID),0) FROM cuSupplier
+    </select>
+</mapper>

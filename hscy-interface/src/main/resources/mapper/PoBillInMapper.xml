@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hf.project.cloth.mapper.PoBillInMapper">
+
+    <insert id="insertBatchHdr" parameterType="java.util.List">
+        INSERT INTO pbcommonPobillInHdr
+        (
+            IID,sPobillInNo,iSupplierId,dPobillInDate,iBillStatus,
+            sCreator,tCreateDate,sAuditMan,tAuditTime
+        )
+        <foreach collection="list" item="item" index="index" separator="UNION ALL" open="(" close=")">
+            SELECT #{item.id},#{item.purchaseInNo},#{item.supplierId},#{item.purchaseInDate},#{item.billStatus},
+            #{item.creator},#{item.createTime},#{item.confirmMan},#{item.confirmTime}
+        </foreach>
+    </insert>
+
+    <insert id="insertBatchDtl" parameterType="java.util.List">
+        INSERT INTO pbcommonPobillInDtl
+        (
+        IID,sBIPItemId,IPobillInHdr,iMaterialDtlId,nQty,
+        iUnitId,ipoBillDtlID,sMaterialNo,uGUID
+        )
+        <foreach collection="list" item="item" index="index" separator="UNION ALL" open="(" close=")">
+            SELECT #{item.id},#{item.BIPItemId},#{item.pobillInHdrID},#{item.materialId},#{item.qty},
+            #{item.unitId},#{item.poBillDtlID},#{item.materialNo},#{item.guid}
+        </foreach>
+    </insert>
+
+    <delete id="deleteBatchHdr" parameterType="java.util.List">
+        DELETE pbcommonPobillInHdr
+        WHERE sPobillInNo IN
+        <foreach collection="list" item="item" index="index" separator="," open="(" close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <delete id="deleteBatchDtl" parameterType="java.util.List">
+        DELETE pbcommonPobillInDtl
+        FROM pbcommonPobillInDtl AD WITH(NOLOCK)
+        JOIN pbcommonPobillInHdr A WITH(NOLOCK) ON A.iID = AD.IPobillInHdr
+        WHERE A.sPobillInNo IN
+        <foreach collection="list" item="item" index="index" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </delete>
+
+    <select id="canDelete" resultType="java.lang.Boolean" parameterType="java.lang.String">
+        SELECT
+            CASE WHEN EXISTS(
+                    SELECT 1
+                    FROM dbo.pbcommonPobillInHdr A WITH(NOLOCK)
+                    JOIN dbo.pbcommonPobillInDtl B WITH(NOLOCK) ON A.iID = B.IPobillInHdr
+                    JOIN dbo.mmHWInDtl C WITH(NOLOCK) ON B.iID = C.sDiff20
+                    JOIN dbo.mmHWInHdr D WITH(NOLOCK) ON C.ummInHdrGUID = D.uGUID
+                    WHERE A.sPobillInNo = #{billCode} ) THEN 0
+                 WHEN EXISTS(
+                     SELECT 1
+                     FROM dbo.pbcommonPobillInHdr A WITH(NOLOCK)
+                     JOIN dbo.pbcommonPobillInDtl B WITH(NOLOCK) ON A.iID = B.IPobillInHdr
+                     JOIN dbo.mmFPInDtl E WITH(NOLOCK) ON B.iID = E.sDiff20
+                     JOIN dbo.mmFPInHdr F WITH(NOLOCK) ON E.ummInHdrGUID=F.uGUID
+                     WHERE A.sPobillInNo = #{billCode} ) THEN 0
+                 ELSE 1
+                END
+    </select>
+
+    <select id="existBillCode" resultType="java.lang.Boolean" parameterType="java.lang.String">
+        SELECT
+		CASE WHEN EXISTS(
+					SELECT 1
+					FROM dbo.pbcommonPobillInHdr WITH(NOLOCK)
+					WHERE sPobillInNo = #{billCode} ) THEN 1
+		ELSE 0 END
+    </select>
+
+    <select id="getMaxMasterId" resultType="java.lang.Integer">
+        SELECT ISNULL(MAX(iID),0) FROM pbcommonPobillInHdr
+    </select>
+
+    <select id="getMaxDetailId" resultType="java.lang.Integer">
+        SELECT ISNULL(MAX(iID),0) FROM pbcommonPobillInDtl
+    </select>
+</mapper>

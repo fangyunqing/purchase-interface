@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hf.project.cloth.mapper.PoBillMapper">
+
+    <insert id="insertBatchHdr" parameterType="java.util.List">
+        INSERT INTO poBillMst
+        (
+            IID,iCompanyId,sPoNo,sPurchaserId,
+            iSupplierId,sSupplierName,iCurrencyId,nExchangeRate,
+            iInvoiceId,sPayCode,iStoreId,sPriceTerm,sDeliveryMethod,
+            iPayDay,sDeliverySite,sMaterialType,iBillStatus,
+            sCreator,dCreateDate,sAuditMan,tAuditTime,nPrepayAmount
+        )
+        <foreach collection="list" item="item" index="index" separator="UNION ALL" open="(" close=")">
+            SELECT #{item.id},#{item.companyId},#{item.planNo},#{item.buyerNo},
+            #{item.supplierId},#{item.supplierName},#{item.currencyId},#{item.exchangeRate},
+            #{item.invoiceId},#{item.paymentCode},#{item.storeId},#{item.priceTermCode},#{item.deliveryMethod},
+            #{item.payDay},#{item.deliverySite},#{item.materialType},#{item.billStatus},
+            #{item.creator},#{item.createTime},#{item.confirmMan},#{item.confirmTime},#{item.prepayAmount}
+        </foreach>
+    </insert>
+
+    <insert id="insertBatchDtl" parameterType="java.util.List">
+        INSERT INTO poBillDtl
+        (
+        IID,sBIPItemId,ipoBillMstId,nQty,iUnitId,
+        nPrice,nAmount,dDeliveryDate,uGuid,sRealModel,
+        ipobillRequestDtlID,iRefDtlId,iMaterialDtlId,
+        isdMrpPoMaterialId,sOrderNo,sStyleNo,sProductNo,nMRPQty,
+        iMRPUnitId,nFixedWastage,nWastageRate,nUnitConvertRate,
+        sRealGMM,sRealWidth,sLotNo
+        )
+        <foreach collection="list" item="item" index="index" separator="UNION ALL" open="(" close=")">
+            SELECT #{item.id},#{item.BIPItemId},#{item.poBillMasterId},#{item.qty},#{item.unitId},
+            #{item.taxPrice},#{item.taxAmount},#{item.deliveryDate},#{item.guid},#{item.realModel},
+            #{item.requestItemId},#{item.requestItemId},#{item.materialId},
+            #{item.sdMrpPoMaterialId},#{item.orderNo},#{item.styleNo},#{item.productNo},#{item.MRPQty},
+            #{item.MRPUnitId},#{item.fixedWastage},#{item.wastageRate},#{item.unitConvertRate},
+            #{item.gmm},#{item.width},#{item.lotNo}
+        </foreach>
+    </insert>
+
+    <delete id="deleteBatchHdr" parameterType="java.util.List">
+        DELETE poBillMst
+        WHERE sPoNo IN
+        <foreach collection="list" item="item" index="index" separator="," open="(" close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <delete id="deleteBatchDtl" parameterType="java.util.List">
+        DELETE poBillDtl
+        FROM poBillDtl AD WITH(NOLOCK)
+        JOIN poBillMst A WITH(NOLOCK) ON A.iID = AD.ipoBillMstId
+        WHERE A.sPoNo IN
+        <foreach collection="list" item="item" index="index" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </delete>
+
+    <select id="canDelete" resultType="java.lang.Boolean" parameterType="java.lang.String">
+        SELECT
+		CASE WHEN EXISTS(
+					SELECT 1
+					FROM dbo.pbcommonPobillInHdr A WITH(NOLOCK)
+					JOIN dbo.pbcommonPobillInDtl B WITH(NOLOCK) ON A.iID = B.IPobillInHdr
+					JOIN dbo.poBillDtl C WITH(NOLOCK) ON B.ipoBillDtlID = C.iID
+					JOIN dbo.poBillMst D WITH(NOLOCK) ON C.ipoBillMstId = D.iID
+					WHERE D.sPoNo = #{billCode} ) THEN 0
+		ELSE 1
+		END
+    </select>
+
+    <select id="existBillCode" resultType="java.lang.Boolean" parameterType="java.lang.String">
+        SELECT
+		CASE WHEN EXISTS(
+					SELECT 1
+					FROM dbo.poBillMst WITH(NOLOCK)
+					WHERE sPoNo = #{billCode} ) THEN 1
+		ELSE 0 END
+    </select>
+
+    <select id="getDtlKey" resultType="java.lang.String" parameterType="java.util.Map">
+		SELECT B.iID
+		FROM dbo.poBillMst A WITH(NOLOCK)
+	    JOIN dbo.poBillDtl B WITH(NOLOCK) ON A.iID = B.ipoBillMstId
+	    WHERE A.sPoNo = #{billCode} AND B.sBIPItemId = #{BIPItemId}
+    </select>
+
+    <select id="getMaxMasterId" resultType="java.lang.Integer">
+        SELECT ISNULL(MAX(iID),0) FROM poBillMst
+    </select>
+
+    <select id="getMaxDetailId" resultType="java.lang.Integer">
+        SELECT ISNULL(MAX(iID),0) FROM poBillDtl
+    </select>
+</mapper>

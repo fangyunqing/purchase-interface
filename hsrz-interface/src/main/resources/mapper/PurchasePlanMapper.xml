@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hf.project.dye.mapper.PurchasePlanMapper">
+
+    <insert id="insertBatchHdr" parameterType="java.util.List">
+        INSERT INTO mmPurchasePlanHdr
+        (uGuid,iCompanyID,sOrgProviderName,sTrafficMode,sPlanNo,
+        dPlanDate,sBuyersName,upbBuyersGUID,sProviderName,upbProviderGUID,
+        sCurrency,nExchangeRate,sContractType,sInvoiceType,sPaymentMode,
+        uOrgProviderGUID,sConfirmMan,tConfirmTime,sCreator,tCreateTime,
+        sUpdateMan,tUpdateTime,iNoteTypeID,iBillStatus,
+        sAuditMan,tAuditTime)
+        <foreach collection="list" item="item" index="index" open="(" close=")" separator="UNION ALL">
+            SELECT #{item.guid},#{item.companyID},#{item.orgProviderName},#{item.trafficMode},#{item.planNo},
+            #{item.planDate},#{item.buyerName},#{item.buyersGUID},#{item.providerName},#{item.providerGUID},
+            #{item.currency},#{item.exchangeRate},#{item.contractType},#{item.invoiceType},#{item.paymentMode},
+            #{item.orgProviderGUID},#{item.confirmMan},#{item.confirmTime},#{item.creator},#{item.createTime},
+            #{item.updateMan},#{item.updateTime},#{item.noteTypeID},#{item.billStatus},
+            #{item.confirmMan},#{item.confirmTime}
+        </foreach>
+    </insert>
+
+    <insert id="insertBatchDtl" parameterType="java.util.List">
+        INSERT INTO mmPurchasePlanDtl
+        (uGuid,sRequestNo,ummPurchaseRequestDtlGUID,sMaterialNo,sMaterialName,
+        nQty,sUnit,nPrice,nAmount,dDeliveryDate,
+        ummMaterialGUID,ummPurchasePlanHdrGUID,sBIPItemId)
+        <foreach collection="list" item="item" index="index" separator="UNION ALL" open="(" close=")">
+            SELECT #{item.guid},#{item.requestNo},#{item.requestItemId},#{item.materialNo},#{item.materialName},
+            #{item.qty},#{item.unit},#{item.taxPrice},#{item.taxAmount},#{item.deliveryDate},
+            #{item.materialGUID},#{item.parentGUID},#{item.BIPItemId}
+        </foreach>
+    </insert>
+
+    <delete id="deleteBatchHdr" parameterType="java.util.List">
+        DELETE mmPurchasePlanHdr
+        WHERE sPlanNo IN
+        <foreach collection="list" item="item" index="index" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </delete>
+
+    <delete id="deleteBatchDtl" parameterType="java.util.List">
+        DELETE mmPurchasePlanDtl
+        FROM mmPurchasePlanDtl AD WITH(NOLOCK)
+        JOIN mmPurchasePlanHdr A WITH(NOLOCK) ON A.uGUID = AD.ummPurchasePlanHdrGUID
+        WHERE A.sPlanNo IN
+        <foreach collection="list" item="item" index="index" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </delete>
+
+    <select id="canDelete" resultType="java.lang.Boolean" parameterType="java.lang.String">
+        SELECT
+		CASE WHEN EXISTS(
+					SELECT 1
+					FROM dbo.pbCommonPurchaseInHdr A WITH(NOLOCK)
+					JOIN dbo.pbCommonPurchaseInDtl B WITH(NOLOCK) ON A.uGUID = B.upbCommonPurchaseInHdrGUID
+					JOIN dbo.mmPurchasePlanDtl C WITH(NOLOCK) ON B.upbCommonPurchaseInHdrGUID = C.uGUID
+					JOIN dbo.mmPurchasePlanHdr D WITH(NOLOCK) ON C.ummPurchasePlanHdrGUID = D.uGUID
+					WHERE D.sPlanNo = #{billCode} ) THEN 0
+		ELSE 1
+		END
+    </select>
+
+    <select id="existBillCode" resultType="java.lang.Boolean" parameterType="java.lang.String">
+        SELECT
+		CASE WHEN EXISTS(
+					SELECT 1
+					FROM dbo.mmPurchasePlanHdr WITH(NOLOCK)
+					WHERE sPlanNo = #{billCode} ) THEN 1
+		ELSE 0 END
+    </select>
+
+    <select id="getDtlKey" resultType="java.lang.String" parameterType="java.util.Map">
+		SELECT B.uGUID
+		FROM dbo.mmPurchasePlanHdr A WITH(NOLOCK)
+	    JOIN dbo.mmPurchasePlanDtl B WITH(NOLOCK) ON A.uGUID = B.ummPurchasePlanHdrGUID
+	    WHERE A.sPlanNo = #{billCode} AND B.sBIPItemId = #{BIPItemId}
+    </select>
+
+</mapper>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hf.project.common.mapper.datadict.MaterialUnitMapper">
+
+    <select id="query" parameterType="java.lang.String" resultMap="MaterialUnitMap">
+        SELECT
+        TOP 1
+        iID,
+        sUnitName,
+        sUnitNameEn,
+        sNCUnit
+        FROM dbo.cuUnit WITH(NOLOCK)
+        WHERE sNCUnit = #{NCCode} and sUnitTypeCode = 'MaterialUnit'
+    </select>
+
+    <resultMap id="MaterialUnitMap" type="BaseData">
+        <id column="iID" jdbcType="VARCHAR" property="id"/>
+        <result column="sUnitName" jdbcType="VARCHAR" property="name" />
+        <result column="sUnitNameEn" jdbcType="VARCHAR" property="code" />
+        <result column="sNCUnit" jdbcType="VARCHAR" property="NCCode" />
+    </resultMap>
+
+    <insert id="insert" parameterType="BaseData">
+        INSERT INTO dbo.cuUnit
+        (iId,sUnitName,sUnitNameEn,sNCUnit,sUnitTypeCode, bUsable,sCreator,dCreateDate)
+        VALUES(#{id},#{name},#{code},#{NCCode},'MaterialUnit',1,'admin',GETDATE())
+    </insert>
+
+</mapper>

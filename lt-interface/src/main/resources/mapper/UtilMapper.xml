@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hf.project.lt.mapper.UtilMapper">
+
+    <select id="getRequestDltUnit" parameterType="map" resultType="map">
+        SELECT b.KCDW kcUnit,b.CGDW cgUnit
+        FROM mat_QG a WITH(NOLOCK)
+        JOIN dbo.mat_QG_C b  WITH(NOLOCK) ON a.QGNo = b.QGNo
+        WHERE a.QGNo  = #{billCode} AND b.CItem = #{id}
+    </select>
+
+
+
+</mapper>

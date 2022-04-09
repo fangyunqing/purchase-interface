@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hf.project.common.mapper.datadict.MaterialUnitMapper">
+
+    <select id="query" parameterType="java.lang.String" resultMap="MaterialUnitMap">
+        SELECT TOP 1
+        ROW_NUMBER() OVER(ORDER BY UNIT,CGUNIT) ID,
+        Unit + ',' + CGUnit unit,
+        NCUNit
+        FROM mat_KCandCGDW
+        WHERE NCUnit = #{NCCode}
+    </select>
+
+    <resultMap id="MaterialUnitMap" type="BaseData">
+        <id column="ID" jdbcType="VARCHAR" property="id"/>
+        <result column="unit" jdbcType="VARCHAR" property="code"/>
+        <result column="NCUnit" jdbcType="VARCHAR" property="NCCode" />
+    </resultMap>
+
+</mapper>

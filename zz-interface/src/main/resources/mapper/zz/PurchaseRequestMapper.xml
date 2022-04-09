@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hf.project.common.mapper.common.PurchaseRequestMapper">
+
+    <select id="query" resultMap="PurchaseRequestMap" parameterType="java.util.List">
+        SELECT
+        A.REQ_NO,
+        '福建华峰新材料有限公司莆田分公司' GROUP_NAME,
+        B.MTL_NO,
+        '福建省莆田市秀屿区东峤镇前沁村前沁1159号' GROUP_ADDRESS,
+        C.USER_ID,
+        A.SYS_DATE,
+        B.ACT_KG,
+        B.GRADE,
+        'KGM' UNIT
+        FROM
+        WM_REQ_HEAD A
+        INNER JOIN WM_REQ_DETAIL B ON A.REQ_NO=B.REQ_NO
+        INNER JOIN (SELECT MIN(USER_ID) USER_ID, USER_NAME, USER_NAME2 FROM SD_USER GROUP BY USER_NAME, USER_NAME2) C ON C.USER_NAME2 = A.USER_NAME or C.USER_NAME = A.USER_NAME
+        WHERE
+        B.ACT_KG>0
+        AND A.REQ_NO IN
+        <foreach collection="list" index="index" item="item" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </select>
+
+    <resultMap id="PurchaseRequestMap" type="PurchaseRequest">
+        <result column="MTL_NO" jdbcType="VARCHAR" property="itemId" />
+        <result column="REQ_NO" jdbcType="VARCHAR" property="billCode" />
+        <result column="GROUP_NAME" jdbcType="VARCHAR" property="purOraName" />
+        <result column="MTL_NO" jdbcType="VARCHAR" property="materialCode" />
+        <result column="GROUP_ADDRESS" jdbcType="VARCHAR" property="planPersonReceiveAddress" />
+        <result column="GROUP_NAME" jdbcType="VARCHAR" property="receiveOrgName" />
+        <result column="USER_ID" jdbcType="VARCHAR" property="reqContactCode" />
+        <result column="SYS_DATE" jdbcType="TIMESTAMP" property="reqDate" />
+        <result column="GROUP_NAME" jdbcType="VARCHAR" property="planPsnOrgName" />
+        <result column="ACT_KG" jdbcType="DECIMAL" property="materialAmounts" />
+        <result column="GRADE" jdbcType="VARCHAR" property="grade" />
+        <result column="UNIT" jdbcType="VARCHAR" property="materialUnitCode" />
+    </resultMap>
+
+    <select id="existRequestDlt" parameterType="java.util.Map" resultType="java.lang.Boolean">
+        SELECT
+		CASE WHEN EXISTS(
+                SELECT 1
+                FROM
+                WM_REQ_HEAD A
+                INNER JOIN WM_REQ_DETAIL B ON A.REQ_NO=B.REQ_NO
+                WHERE A.REQ_NO = #{billCode} AND B.MTL_NO = #{id} ) THEN 1
+		ELSE 0
+		END
+		FROM DUAL
+    </select>
+</mapper>

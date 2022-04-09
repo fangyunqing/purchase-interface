@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hf.project.dye.mapper.CommonPurchaseInMapper">
+
+    <insert id="insertBatchHdr" parameterType="java.util.List">
+        INSERT INTO pbCommonPurchaseInHdr
+        (uGuid,nGrossWeight,nNetWeight,sNCDBBillCode,sProviderName,
+        upbProviderGUID,sStoreName,sStoreNo,sType,sPurchaseInNo,
+        sCreator,tCreateTime,sUpdateMan,tUpdateTime,sConfirmMan,tConfirmTime,
+        dPurchaseInDate,sProviderNo,iNoteTypeID,iBillStatus,ummStoreGUID)
+        <foreach collection="list" item="item" index="index" open="(" close=")" separator="UNION ALL">
+            SELECT #{item.guid},#{item.grossWeight},#{item.netWeight},#{item.weightBridgeCode},#{item.providerName},
+            #{item.providerGUID},#{item.storeName},#{item.storeNo},#{item.type},#{item.purchaseInNo},
+            #{item.creator},#{item.createTime},#{item.updateMan},#{item.updateTime},#{item.confirmMan},#{item.confirmTime},
+            #{item.purchaseInDate},#{item.providerNo},#{item.noteTypeID},#{item.billStatus},#{item.storeGUID}
+        </foreach>
+    </insert>
+
+    <insert id="insertBatchDtl" parameterType="java.util.List">
+        INSERT INTO pbCommonPurchaseInDtl
+        (uGuid,upbCommonPurchaseInHdrGUID,ummPurchasePlanDtlGUID,nInPkgExQty,nPrice,
+        nQty,sMaterialLot,sMaterialName,sMaterialNo,sPkgUnitEx,
+        sPlanNo,sUnit,ummMaterialGUID,sBIPItemId,nNoTaxPrice)
+        <foreach collection="list" item="item" index="index" separator="UNION ALL" open="(" close=")">
+            SELECT #{item.guid},#{item.parentGUID},#{item.purchasePlanDtlGUID},#{item.inPkgExQty},#{item.taxPrice},
+            #{item.qty},#{item.materialLot},#{item.materialName},#{item.materialNo},#{item.pkgUnitEx},
+            #{item.planNo},#{item.unit},#{item.materialGUID},#{item.BIPItemId},#{item.price}
+        </foreach>
+    </insert>
+
+    <delete id="deleteBatchHdr" parameterType="java.util.List">
+        DELETE pbCommonPurchaseInHdr
+        WHERE sPurchaseInNo IN
+        <foreach collection="list" item="item" index="index" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </delete>
+
+    <delete id="deleteBatchDtl" parameterType="java.util.List">
+        DELETE pbCommonPurchaseInDtl
+        FROM pbCommonPurchaseInDtl AD WITH(NOLOCK)
+        JOIN pbCommonPurchaseInHdr A ON A.uGUID = AD.upbCommonPurchaseInHdrGUID
+        WHERE A.sPurchaseInNo IN
+        <foreach collection="list" item="item" index="index" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </delete>
+
+    <select id="canDelete" resultType="java.lang.Boolean" parameterType="java.lang.String">
+        SELECT
+		CASE WHEN EXISTS(
+					SELECT 1
+					FROM dbo.pbCommonPurchaseInHdr A WITH(NOLOCK)
+					JOIN dbo.pbCommonPurchaseInDtl B WITH(NOLOCK) ON A.uGUID = B.upbCommonPurchaseInHdrGUID
+					JOIN dbo.mmDCInDtl C WITH(NOLOCK) ON B.uGUID = C.ummPurchasePlanDtlGUID
+					JOIN dbo.mmDCInHdr D WITH(NOLOCK) ON C.ummInHdrGUID = D.uGUID
+					WHERE A.sPurchaseInNo = #{billCode} ) THEN 0
+		ELSE 1
+		END
+    </select>
+
+    <select id="existBillCode" resultType="java.lang.Boolean" parameterType="java.lang.String">
+        SELECT
+		CASE WHEN EXISTS(
+					SELECT 1
+					FROM dbo.pbCommonPurchaseInHdr WITH(NOLOCK)
+					WHERE sPurchaseInNo = #{billCode} ) THEN 1
+		ELSE 0 END
+    </select>
+</mapper>

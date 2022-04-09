@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hf.project.common.mapper.datadict.InvoiceTypeMapper">
+
+    <select id="query" parameterType="java.lang.String" resultMap="InvoiceTypeMap">
+        SELECT TOP 1
+        checkno checkNo,
+        checknm checkName,
+        NCCheckNo
+        FROM ba_check
+        WHERE NCCheckNo = #{NCCode}
+    </select>
+
+    <resultMap id="InvoiceTypeMap" type="BaseData">
+        <id column="checkNo" jdbcType="VARCHAR" property="id"/>
+        <result column="checkNo" jdbcType="VARCHAR" property="code"/>
+        <result column="checkName" jdbcType="VARCHAR" property="name" />
+        <result column="NCCheckNo" jdbcType="VARCHAR" property="NCCode" />
+    </resultMap>
+
+    <insert id="insert" parameterType="BaseData">
+        INSERT INTO ba_check(checkno,checknm,taxkind,NCCheckNo)
+        VALUES(#{code},#{name},'01',#{NCCode})
+    </insert>
+
+</mapper>
